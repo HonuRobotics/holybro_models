@@ -1,0 +1,2 @@
+# PX4 BSD-3 placeholder meshes: no textual diffs in PRs, excluded from language stats.
+x500_description/meshes/** -diff linguist-vendored
