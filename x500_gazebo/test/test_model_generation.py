@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('x500_gazebo'))
@@ -100,7 +101,7 @@ def test_plugin_references_survive_lumping():
     link_refs = {ref.text for ref in sdf_root.iter('linkName')}
     assert joint_refs and link_refs
     if shutil.which('gz') is None:
-        return  # cannot convert without the gz CLI
+        pytest.skip('gz CLI unavailable: post-lumping check cannot run')
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(urdf_text)
         urdf_path = f.name

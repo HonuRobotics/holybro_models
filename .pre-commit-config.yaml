@@ -6,19 +6,20 @@
 # Setup:  pip install pre-commit && pre-commit install
 # The ament_* hooks need a sourced ROS environment.
 
-exclude: ^x500_description/(meshes|rviz)/
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^x500_description/(meshes|rviz)/
       - id: end-of-file-fixer
+        exclude: ^x500_description/(meshes|rviz)/
       - id: check-merge-conflict
       - id: check-yaml
       - id: check-xml
         types: [text]
         files: \.(xml|xacro|sdf)$|model\.config$
+        exclude: ^x500_description/meshes/
       # Existing placeholder meshes reach 24 MB; tighten once the artist
       # assets (with a size budget) replace them.
       - id: check-added-large-files
@@ -31,6 +32,7 @@ repos:
         entry: ament_copyright
         language: system
         types: [python]
+        exclude: ^x500_description/(meshes|rviz)/
       - id: ament-flake8
         name: ament_flake8
         entry: ament_flake8
