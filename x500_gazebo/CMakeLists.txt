@@ -52,8 +52,12 @@ if(BUILD_TESTING)
     TIMEOUT 60)
   ament_add_pytest_test(test_model_generation test/test_model_generation.py
     TIMEOUT 180)
-  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 300)
-  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300)
+  # NOCAPTURE so the sim output printed at teardown reaches the test logs
+  # even when every assertion passes.
+  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 300
+    NOCAPTURE)
+  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
+    NOCAPTURE)
 endif()
 
 ament_package()

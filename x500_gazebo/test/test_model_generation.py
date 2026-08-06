@@ -15,14 +15,13 @@
 
 import importlib.util
 from pathlib import Path
-import shutil
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
-import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('x500_gazebo'))
@@ -62,7 +61,7 @@ def motor_plugins(root):
 
 
 def test_model_generation_rotors_and_sensors():
-    """#7: four motors with the quad_x spin sequence; flight sensors present."""
+    """Four motors with the quad_x spin sequence; flight sensors present."""
     root, text = xacro(MODEL_XACRO, default_config())
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
     motors = motor_plugins(root)
@@ -75,7 +74,7 @@ def test_model_generation_rotors_and_sensors():
 
 
 def test_hover_thrust_margin():
-    """#2: max total thrust exceeds default all-up weight with margin."""
+    """Max total thrust exceeds the default all-up weight with margin."""
     root, _ = xacro(MODEL_XACRO, default_config())
     motor = motor_plugins(root)[0]
     k = float(motor.find('motorConstant').text)
@@ -90,7 +89,7 @@ def test_hover_thrust_margin():
 
 def test_plugin_references_survive_lumping():
     """
-    #8: plugin joint/link refs exist in the POST-lumping converted model.
+    Plugin joint/link refs exist in the POST-lumping converted model.
 
     gz's URDF conversion lumps fixed joints away, so references must be
     validated against the converted model, not the raw URDF.
@@ -100,8 +99,6 @@ def test_plugin_references_survive_lumping():
     joint_refs = {ref.text for ref in sdf_root.iter('jointName')}
     link_refs = {ref.text for ref in sdf_root.iter('linkName')}
     assert joint_refs and link_refs
-    if shutil.which('gz') is None:
-        pytest.skip('gz CLI unavailable: post-lumping check cannot run')
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(urdf_text)
         urdf_path = f.name
@@ -117,7 +114,7 @@ def test_plugin_references_survive_lumping():
 
 
 def test_sensor_and_bridge_topics_agree():
-    """#10: model gz topics == generated bridge gz topics, by construction."""
+    """Model gz topics equal generated bridge gz topics, by construction."""
     for config in (default_config(),
                    default_config().replace('topic_namespace: x500',
                                             'topic_namespace: uav_a')):
@@ -127,3 +124,15 @@ def test_sensor_and_bridge_topics_agree():
         entries = bridge_gen.bridge_entries(yaml.safe_load(config))
         bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
         assert sdf_topics == bridge_topics
+
+
+def test_default_config_covers_catalog():
+    """The shipped dev-kit loadout exercises every accessory type."""
+    xacro_text = (DESC_SHARE / 'urdf' / 'accessories.xacro').read_text()
+    catalog = set(re.findall(r'<xacro:macro name="([a-z]\w*)"', xacro_text))
+    catalog -= {'mount_accessories'}
+    config_types = {a['type']
+                    for a in yaml.safe_load(default_config())['accessories']}
+    assert config_types == catalog, (
+        f'default loadout drift: missing {catalog - config_types}, '
+        f'unknown {config_types - catalog}')

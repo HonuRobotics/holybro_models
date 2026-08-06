@@ -48,12 +48,13 @@ def gz(env, *args, timeout=10):
 def sim(request):
     """Start a headless gz server on an isolated partition; yield its env."""
     if shutil.which('gz') is None:
-        pytest.skip('gz CLI not available')
+        pytest.fail('gz CLI not available: the simulation suite cannot run')
     env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
     log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
                                       prefix='gz_launch_')
-    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', str(WORLD)], env=env,
-                            stdout=log, stderr=subprocess.STDOUT)
+    # -v 3 so warnings and messages (not just errors) reach the audited log.
+    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', '-v', '3', str(WORLD)],
+                            env=env, stdout=log, stderr=subprocess.STDOUT)
 
     def fail(message):
         log.flush()
@@ -67,6 +68,11 @@ def sim(request):
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait(timeout=10)
+        # Always surface the server output: warnings matter even when every
+        # assertion passed, and exit codes underreport partial failures.
+        log.flush()
+        tail = ''.join(open(log.name).readlines()[-60:])
+        print(f'\n--- gz sim output tail ({log.name}) ---\n{tail}')
 
     request.addfinalizer(teardown)
     deadline = time.time() + 120
@@ -81,13 +87,13 @@ def sim(request):
 
 
 def test_model_loaded(sim):
-    """#11: the composed model is in the world."""
+    """The composed model is in the world."""
     _, out = gz(sim, 'model', '--list')
     assert 'x500' in out
 
 
 def test_sensor_topics_advertised(sim):
-    """#11: the flight-sensor topics and world clock are advertised."""
+    """The flight-sensor topics and world clock are advertised."""
     deadline = time.time() + 30
     needed = ('/x500/imu', '/x500/air_pressure', '/x500/mag', '/x500/gps',
               f'/world/{WORLD_NAME}/clock')
@@ -100,7 +106,7 @@ def test_sensor_topics_advertised(sim):
 
 
 def test_physics_steps(sim):
-    """#11: simulation iterations advance (systems survive stepping)."""
+    """Simulation iterations advance (systems survive stepping)."""
     deadline = time.time() + 30
     while time.time() < deadline:
         code, out = gz(sim, 'topic', '-e', '-t',
@@ -113,7 +119,7 @@ def test_physics_steps(sim):
 
 
 def test_imu_publishes_data(sim):
-    """#12: the IMU streams real data (non-render sensor: hard assertion)."""
+    """The IMU streams real data (non-render sensor: hard assertion)."""
     deadline = time.time() + 45
     while time.time() < deadline:
         code, out = gz(sim, 'topic', '-e', '-t', '/x500/imu', '-n', '1',
@@ -125,7 +131,7 @@ def test_imu_publishes_data(sim):
 
 
 def test_gps_publishes_fix(sim):
-    """#12: NavSat resolves the world spherical coordinates to a fix."""
+    """The NavSat sensor resolves the world spherical coordinates to a fix."""
     deadline = time.time() + 45
     while time.time() < deadline:
         code, out = gz(sim, 'topic', '-e', '-t', '/x500/gps', '-n', '1',

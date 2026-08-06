@@ -15,13 +15,11 @@
 
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
-import pytest
 
 SHARE = Path(get_package_share_directory('x500_description'))
 TOP_XACRO = SHARE / 'urdf' / 'x500.urdf.xacro'
@@ -60,7 +58,9 @@ def xacro_output(config_text):
         config_path = f.name
     out = subprocess.run(
         ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        check=True, capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0, (
+        f'xacro failed ({out.returncode})\n--- stderr ---\n{out.stderr}')
     return out.stdout
 
 
@@ -75,7 +75,7 @@ def link_names(root):
 
 
 def test_default_config_dev_kit_loadout():
-    """#1: the shipped default builds 4 rotors + the dev-kit accessories."""
+    """The shipped default builds 4 rotors + the dev-kit accessories."""
     default = (SHARE / 'config' / 'x500.yaml').read_text()
     links = link_names(generate_urdf(default))
     rotors = {li for li in links if re.fullmatch(r'rotor_\d', li)}
@@ -84,7 +84,7 @@ def test_default_config_dev_kit_loadout():
 
 
 def test_quad_x_spin_convention():
-    """#2: PX4 quad_x chirality: ccw props on rotors 0/1, cw on 2/3."""
+    """PX4 quad_x chirality: ccw props on rotors 0/1, cw on 2/3."""
     text = xacro_output(make_config())
     root = ET.fromstring(text)
     for number in range(4):
@@ -99,20 +99,22 @@ def test_quad_x_spin_convention():
 
 
 def test_catalog_completeness_and_toggle():
-    """#4: every accessory type generates its link, and only when configured."""
+    """Every accessory type generates its link, and only when configured."""
     empty_links = link_names(generate_urdf(make_config()))
     for type_name, pose in CATALOG.items():
         name = f'acc_{type_name}'
         root = generate_urdf(make_config([(type_name, name, pose)]))
         assert name in link_names(root), f'{type_name} missing link'
         assert name not in empty_links
-    dispatcher = set(re.findall(r"t == '(\w+)'",
-                                ACCESSORIES_XACRO.read_text()))
-    assert dispatcher == set(CATALOG)
+    # The dispatcher invokes the config type directly as a macro, so every
+    # catalog type must have a same-named macro.
+    macros = set(re.findall(r'<xacro:macro name="([a-z]\w*)"',
+                            ACCESSORIES_XACRO.read_text()))
+    assert set(CATALOG) <= macros, f'missing macros: {set(CATALOG) - macros}'
 
 
 def test_mesh_references_resolve():
-    """#5: every package:// mesh URI in the generated URDF exists on disk."""
+    """Every package:// mesh URI in the generated URDF exists on disk."""
     root = generate_urdf(make_config(full_catalog_accessories()))
     uris = {m.get('filename') for m in root.findall('.//mesh')}
     assert uris
@@ -124,11 +126,12 @@ def test_mesh_references_resolve():
 
 def test_check_urdf_accepts_generated():
     """The urdfdom validator accepts the generated URDF."""
-    if shutil.which('check_urdf') is None:
-        pytest.skip('check_urdf not available')
     text = xacro_output(make_config(full_catalog_accessories()))
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(text)
         urdf_path = f.name
-    subprocess.run(['check_urdf', urdf_path], check=True,
-                   capture_output=True, timeout=30)
+    out = subprocess.run(['check_urdf', urdf_path], capture_output=True,
+                         text=True, timeout=30)
+    assert out.returncode == 0, (
+        f'check_urdf rejected the URDF ({out.returncode})\n'
+        f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')

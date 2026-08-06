@@ -32,7 +32,7 @@ def entries_for(cfg):
 
 
 def test_flight_sensors_always_bridged():
-    """#9: clock + the four flight sensors exist even with no accessories."""
+    """Clock + the four flight sensors exist even with no accessories."""
     entries = entries_for({'accessories': []})
     assert set(entries) == {'/clock', '/x500/imu', '/x500/air_pressure',
                             '/x500/mag', '/x500/gps'}
@@ -43,20 +43,20 @@ def test_flight_sensors_always_bridged():
 
 
 def test_lazy_default_clock_eager():
-    """#9: sensor entries are lazy, /clock is not."""
+    """Sensor entries are lazy, /clock is not."""
     entries = entries_for({})
     assert 'lazy' not in entries['/clock']
     assert entries['/x500/imu']['lazy'] is True
 
 
 def test_namespace_override():
-    """#9: topic_namespace renames every sensor topic."""
+    """topic_namespace renames every sensor topic."""
     entries = entries_for({'topic_namespace': 'uav_a'})
     assert '/uav_a/imu' in entries and '/x500/imu' not in entries
 
 
 def test_accessories_produce_nothing_yet():
-    """#9: current accessory types carry no simulated topics."""
+    """Current accessory types carry no simulated topics."""
     cfg = {'accessories': [
         {'type': 'battery', 'name': 'battery', 'xyz': '0 0 0',
          'rpy': '0 0 0'},
@@ -66,7 +66,7 @@ def test_accessories_produce_nothing_yet():
 
 
 def test_extra_bridge_topics_verbatim():
-    """#9: extra_bridge_topics entries are appended untouched."""
+    """extra_bridge_topics entries are appended untouched."""
     extra = {'ros_topic_name': '/x500/motors',
              'gz_topic_name': '/x500/command/motor_speed',
              'ros_type_name': 'actuator_msgs/msg/Actuators',
