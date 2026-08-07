@@ -136,3 +136,26 @@ def test_default_config_covers_catalog():
     assert config_types == catalog, (
         f'default loadout drift: missing {catalog - config_types}, '
         f'unknown {config_types - catalog}')
+
+
+def test_sensor_frame_ids_resolve_in_tf():
+    """
+    Every sensor's <frame_id> names a frame TF actually carries.
+
+    TF comes from the URDF via robot_state_publisher; gz's derived SDF scoped
+    ids and the sensor wrapper links are in neither, so an unset frame_id
+    yields messages no lookup_transform can resolve. The deprecated
+    gz_frame_id spelling also fails this test on purpose.
+    """
+    sdf_root, _ = xacro(MODEL_XACRO, default_config())
+    urdf_root, _ = xacro(URDF_XACRO, default_config())
+    urdf_links = {li.get('name') for li in urdf_root.findall('link')}
+    sensors = list(sdf_root.iter('sensor'))
+    assert sensors
+    for sensor in sensors:
+        frame = sensor.find('frame_id')
+        assert frame is not None, (
+            f'sensor {sensor.get("name")} sets no <frame_id>')
+        assert frame.text in urdf_links, (
+            f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
+            f'which robot_state_publisher never puts in TF')

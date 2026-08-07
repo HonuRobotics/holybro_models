@@ -63,7 +63,7 @@
       </inertial>
 
       <sensor name="imu" type="imu">
-        <gz_frame_id>base_link</gz_frame_id>
+        <frame_id>base_link</frame_id>
         <topic>${topic_ns}/imu</topic>
         <always_on>1</always_on>
         <update_rate>250</update_rate>
@@ -82,7 +82,7 @@
       </sensor>
 
       <sensor name="air_pressure" type="air_pressure">
-        <gz_frame_id>base_link</gz_frame_id>
+        <frame_id>base_link</frame_id>
         <topic>${topic_ns}/air_pressure</topic>
         <always_on>1</always_on>
         <update_rate>50</update_rate>
@@ -92,7 +92,7 @@
       </sensor>
 
       <sensor name="magnetometer" type="magnetometer">
-        <gz_frame_id>base_link</gz_frame_id>
+        <frame_id>base_link</frame_id>
         <topic>${topic_ns}/mag</topic>
         <always_on>1</always_on>
         <update_rate>100</update_rate>
@@ -104,7 +104,7 @@
       </sensor>
 
       <sensor name="navsat" type="navsat">
-        <gz_frame_id>base_link</gz_frame_id>
+        <frame_id>base_link</frame_id>
         <topic>${topic_ns}/gps</topic>
         <always_on>1</always_on>
         <update_rate>30</update_rate>
