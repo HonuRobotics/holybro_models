@@ -29,7 +29,7 @@ launch/   display.launch.xml
 ## Build
 
 ```bash
-colcon build --packages-select x500_description
+colcon build --merge-install --packages-select x500_description
 source install/setup.bash
 ```
 

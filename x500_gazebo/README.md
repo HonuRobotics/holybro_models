@@ -25,7 +25,7 @@ keeping [`x500_description`](../x500_description) free of simulator code.
 ## Build
 
 ```bash
-colcon build --packages-select x500_description x500_gazebo
+colcon build --merge-install --packages-select x500_description x500_gazebo
 source install/setup.bash
 ```
 

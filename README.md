@@ -21,7 +21,7 @@ cd ~/ws/src && git clone https://github.com/HonuRobotics/holybro_models.git
 cd ~/ws
 rosdep update
 rosdep install --from-paths src --ignore-packages-from-source --default-yes
-colcon build
+colcon build --merge-install
 source install/setup.bash
 ros2 launch x500_gazebo sim.launch.xml     # Gazebo
 ros2 launch x500_description display.launch.xml   # RViz
