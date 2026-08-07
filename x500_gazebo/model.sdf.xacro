@@ -49,6 +49,13 @@
       <uri>package://x500_description/urdf/x500.urdf</uri>
     </include>
 
+    <!-- Joint states for the rotor joints, so robot_state_publisher can
+         animate the props in RViz. Bridged to /joint_states. -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+      <topic>${topic_ns}/joint_states</topic>
+    </plugin>
+
     <!-- Flight sensors on a body-fixed massless link at the CG (rigidly equal to
          being on base_link; data is reported in the base_link frame). Backends are
          the *-system plugins in the world. PX4 (BSD-3) noise values. -->

@@ -56,6 +56,15 @@ def bridge_entries(cfg):
         'gz_type_name': 'gz.msgs.Clock',
         'direction': 'GZ_TO_ROS',
     }]
+    # Rotor joint states from the JointStatePublisher plugin, for
+    # robot_state_publisher / RViz prop animation.
+    entries.append({
+        'ros_topic_name': '/joint_states',
+        'gz_topic_name': absolute(f'{ns}/joint_states'),
+        'ros_type_name': 'sensor_msgs/msg/JointState',
+        'gz_type_name': 'gz.msgs.Model',
+        'direction': 'GZ_TO_ROS',
+    })
     for suffix, ros_type, gz_type in FLIGHT_SENSORS:
         entries.append({
             'ros_topic_name': absolute(f'{ns}/{suffix}'),

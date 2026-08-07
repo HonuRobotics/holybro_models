@@ -34,8 +34,8 @@ def entries_for(cfg):
 def test_flight_sensors_always_bridged():
     """Clock + the four flight sensors exist even with no accessories."""
     entries = entries_for({'accessories': []})
-    assert set(entries) == {'/clock', '/x500/imu', '/x500/air_pressure',
-                            '/x500/mag', '/x500/gps'}
+    assert set(entries) == {'/clock', '/joint_states', '/x500/imu',
+                            '/x500/air_pressure', '/x500/mag', '/x500/gps'}
     imu = entries['/x500/imu']
     assert imu['ros_type_name'] == 'sensor_msgs/msg/Imu'
     assert imu['gz_type_name'] == 'gz.msgs.IMU'
@@ -62,7 +62,7 @@ def test_accessories_produce_nothing_yet():
          'rpy': '0 0 0'},
         {'type': 'gimbal', 'name': 'gimbal', 'xyz': '0 0 0',
          'rpy': '0 0 0'}]}
-    assert len(entries_for(cfg)) == 5  # clock + 4 flight sensors
+    assert len(entries_for(cfg)) == 6  # clock + joint states + 4 flight sensors
 
 
 def test_extra_bridge_topics_verbatim():

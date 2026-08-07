@@ -71,6 +71,13 @@ def test_robot_description_published(sim):
     assert code == 0 and 'x500' in out, f'no latched description\n{err}'
 
 
+def test_joint_states_flow(sim):
+    """Rotor joint states cross the bridge, so RViz can animate the props."""
+    code, out, err = ros(sim, 'topic', 'echo', '/joint_states', '--once',
+                         timeout=30)
+    assert code == 0 and 'rotor_0_joint' in out, f'no joint states\n{err}'
+
+
 def test_imu_flows_to_ros(sim):
     """IMU data crosses the bridge (non-render sensor: hard assertion)."""
     def imu_seen():

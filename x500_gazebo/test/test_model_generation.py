@@ -122,6 +122,8 @@ def test_sensor_and_bridge_topics_agree():
         sdf_topics = {t.text if t.text.startswith('/') else '/' + t.text
                       for t in root.iter('topic')}
         entries = bridge_gen.bridge_entries(yaml.safe_load(config))
+        # /clock has no model-side <topic>; joint_states does (the plugin's),
+        # so it participates in the comparison like any sensor topic.
         bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
         assert sdf_topics == bridge_topics
 
@@ -159,3 +161,15 @@ def test_sensor_frame_ids_resolve_in_tf():
         assert frame.text in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
             f'which robot_state_publisher never puts in TF')
+
+
+def test_installed_artifacts_match_shipped_config():
+    """The generated files that ship agree with the config they came from."""
+    cfg = yaml.safe_load(default_config())
+    bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
+    assert yaml.safe_load(bridge_yaml.read_text()) == \
+        bridge_gen.bridge_entries(cfg)
+    urdf = ET.fromstring((DESC_SHARE / 'urdf' / 'x500.urdf').read_text())
+    links = {li.get('name') for li in urdf.findall('link')}
+    for acc in cfg['accessories']:
+        assert acc['name'] in links, f'{acc["name"]} missing from shipped URDF'
