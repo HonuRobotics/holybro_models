@@ -27,18 +27,10 @@ ros2 launch x500_gazebo sim.launch.xml     # Gazebo
 ros2 launch x500_description display.launch.xml   # RViz
 ```
 
-## Development
+## Contributing
 
-Optional but recommended: install the pre-commit hooks; they mirror the ament
-linters that CI runs.
-
-```bash
-pip install pre-commit
-pre-commit install              # from the repo root; runs on every git commit
-pre-commit run --all-files      # manual check
-```
-
-The `ament_*` hooks need a sourced ROS environment.
+Developer workflow (build, tests, pre-commit hooks, conventions):
+see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
