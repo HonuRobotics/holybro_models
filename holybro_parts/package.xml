@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>holybro_parts</name>
+  <version>0.1.0</version>
+  <description>
+    Shared part library for Holybro vehicle models. Each part is one URDF
+    xacro macro stating its own inertia, visuals, collisions, slots (where
+    other parts fit), frames and, for propellers, a drive table. The
+    assembly dispatcher builds a vehicle from a config; assemblies live in
+    the per vehicle description packages.
+  </description>
+  <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
+  <license>Apache-2.0</license>
+  <license file="models/LICENSE">BSD-3-Clause</license>
+  <url type="repository">https://github.com/HonuRobotics/holybro_models</url>
+  <url type="bugtracker">https://github.com/HonuRobotics/holybro_models/issues</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

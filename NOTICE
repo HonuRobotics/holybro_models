@@ -6,9 +6,9 @@ Licensed under the Apache License, Version 2.0 (see LICENSE).
 This repository redistributes third-party assets, reused as placeholders
 until original art replaces them:
 
-- x500_description/meshes/* (frame, motor, propeller meshes and CF.png)
+- holybro_parts/models/* (frame, motor, propeller meshes and CF.png)
   From PX4-gazebo-models (https://github.com/PX4/PX4-gazebo-models).
-  License: BSD-3-Clause (copy in x500_description/meshes/LICENSE).
+  License: BSD-3-Clause (copy in holybro_parts/models/LICENSE).
 
 Model geometry, inertias and motor constants also derive from the
 BSD-3-Clause PX4 x500 model. See x500_description/ASSETS.md for details.

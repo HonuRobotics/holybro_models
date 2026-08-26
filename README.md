@@ -1,38 +1,30 @@
 # Holybro models
 
-ROS 2 / Gazebo Sim model packages for Holybro vehicles: currently the X500 V2
-quadcopter development kit.
+ROS 2 / Gazebo Sim model packages for Holybro vehicles: currently the X500
+V2 quadcopter development kit, built from a configurable part library.
+Targets **ROS 2 Lyrical + Gazebo Jetty** (the default pairing on Ubuntu
+26.04), via `ros_gz`.
 
-| Package | Purpose |
-|---------|---------|
-| [`x500_description`](x500_description/) | URDF/xacro, meshes, RViz; pure description, no simulator code |
-| [`x500_gazebo`](x500_gazebo/) | Composed Gazebo model (rotor actuators + flight sensors), world, launch and ros_gz bridge |
+**Documentation: <https://honurobotics.github.io/holybro_models/>**
 
-Targets **ROS 2 Lyrical + Gazebo Jetty** (the default pairing on Ubuntu 26.04),
-via `ros_gz`. The model is control-agnostic: PX4 SITL, ArduPilot SITL or any
-custom controller can drive the motor bus (see the `x500_gazebo` README).
+The site covers installation, running and configuring the X500, the ROS
+interfaces and the design of the parts pipeline.
 
 ## Quick start
 
-From source (binary `apt install ros-<distro>-x500-*` packages are planned):
-
 ```bash
+mkdir -p ~/ws/src
 cd ~/ws/src && git clone https://github.com/HonuRobotics/holybro_models.git
 cd ~/ws
 rosdep update
 rosdep install --from-paths src --ignore-packages-from-source --default-yes
 colcon build --merge-install
 source install/setup.bash
-ros2 launch x500_gazebo sim.launch.xml     # Gazebo
-ros2 launch x500_description display.launch.xml   # RViz
+ros2 launch x500_gazebo sim.launch.xml
 ```
 
 ## Contributing
 
-Developer workflow (build, tests, pre-commit hooks, conventions):
-see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-Apache-2.0 (see [LICENSE](LICENSE)). Reused BSD-3-Clause PX4 assets are
-credited in [NOTICE](NOTICE) and `x500_description/ASSETS.md`.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed Apache 2.0 (see
+[LICENSE](LICENSE)); the placeholder meshes are BSD 3 Clause from PX4 (see
+[NOTICE](NOTICE) and `holybro_parts/models/LICENSE`).

@@ -15,13 +15,13 @@
 
 import importlib.util
 from pathlib import Path
-import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+from holybro_parts import assembly
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('x500_gazebo'))
@@ -54,6 +54,12 @@ def default_config():
     return (DESC_SHARE / 'config' / 'x500.yaml').read_text()
 
 
+def urdf_instances(config_text):
+    """(type, name) pairs of the assembled URDF for a config."""
+    root, _ = xacro(URDF_XACRO, config_text)
+    return [(t, n) for t, n, _ in assembly.instances(root)]
+
+
 def motor_plugins(root):
     """Return the MulticopterMotorModel plugin elements."""
     return [p for p in root.iter('plugin')
@@ -64,6 +70,8 @@ def test_model_generation_rotors_and_sensors():
     """Four motors with the quad_x spin sequence; flight sensors present."""
     root, text = xacro(MODEL_XACRO, default_config())
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
+    assert 'assembly_part' not in text and 'assembly_slot' not in text, \
+        'manifest elements belong to the URDF only'
     motors = motor_plugins(root)
     assert len(motors) == 4
     by_number = {int(m.find('motorNumber').text):
@@ -121,23 +129,30 @@ def test_sensor_and_bridge_topics_agree():
         root, _ = xacro(MODEL_XACRO, config)
         sdf_topics = {t.text if t.text.startswith('/') else '/' + t.text
                       for t in root.iter('topic')}
-        entries = bridge_gen.bridge_entries(yaml.safe_load(config))
+        entries = bridge_gen.bridge_entries(yaml.safe_load(config),
+                                            urdf_instances(config))
         # /clock has no model-side <topic>; joint_states does (the plugin's),
         # so it participates in the comparison like any sensor topic.
         bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
         assert sdf_topics == bridge_topics
 
 
-def test_default_config_covers_catalog():
-    """The shipped dev-kit loadout exercises every accessory type."""
-    xacro_text = (DESC_SHARE / 'urdf' / 'accessories.xacro').read_text()
-    catalog = set(re.findall(r'<xacro:macro name="([a-z]\w*)"', xacro_text))
-    catalog -= {'mount_accessories'}
-    config_types = {a['type']
-                    for a in yaml.safe_load(default_config())['accessories']}
-    assert config_types == catalog, (
-        f'default loadout drift: missing {catalog - config_types}, '
-        f'unknown {config_types - catalog}')
+def test_motors_follow_the_propeller_parts():
+    """Emptying or swapping a rotor slot moves or drops its motor plugin."""
+    cfg = yaml.safe_dump(yaml.safe_load(default_config()) | {'parts': [
+        {'slot': 'rotor_3', 'type': 'none'}]}, sort_keys=False)
+    root, _ = xacro(MODEL_XACRO, cfg)
+    numbers = {int(m.find('motorNumber').text) for m in motor_plugins(root)}
+    assert numbers == {0, 1, 2}
+    # A rotor occupant renamed away from its actuator number fails loudly.
+    cfg = yaml.safe_dump(yaml.safe_load(default_config()) | {'parts': [
+        {'slot': 'rotor_0', 'type': 'prop_1345_ccw', 'name': 'front'}]},
+        sort_keys=False)
+    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+        f.write(cfg)
+    out = subprocess.run(['xacro', str(MODEL_XACRO), f'config_file:={f.name}'],
+                         capture_output=True, text=True, timeout=60)
+    assert out.returncode != 0 and 'actuator number' in out.stderr, out.stderr[-400:]
 
 
 def test_sensor_frame_ids_resolve_in_tf():
@@ -166,10 +181,12 @@ def test_sensor_frame_ids_resolve_in_tf():
 def test_installed_artifacts_match_shipped_config():
     """The generated files that ship agree with the config they came from."""
     cfg = yaml.safe_load(default_config())
+    installed_urdf = ET.parse(DESC_SHARE / 'urdf' / 'x500.urdf').getroot()
+    instances = [(t, n) for t, n, _ in assembly.instances(installed_urdf)]
     bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
     assert yaml.safe_load(bridge_yaml.read_text()) == \
-        bridge_gen.bridge_entries(cfg)
-    urdf = ET.fromstring((DESC_SHARE / 'urdf' / 'x500.urdf').read_text())
-    links = {li.get('name') for li in urdf.findall('link')}
-    for acc in cfg['accessories']:
-        assert acc['name'] in links, f'{acc["name"]} missing from shipped URDF'
+        bridge_gen.bridge_entries(cfg, instances)
+    names = {n for _, n in instances}
+    assert {'rotor_0', 'rotor_1', 'rotor_2', 'rotor_3', 'battery', 'gps'} <= names
+    links = {li.get('name') for li in installed_urdf.findall('link')}
+    assert names <= links

@@ -1,129 +1,27 @@
 <?xml version="1.0"?>
 <!--
-  Holybro X500 V2 quadcopter (quad-X layout), aerial vehicle.
+  Holybro X500 V2 quadcopter, assembled from holybro_parts.
 
-  Geometry, inertias and meshes are reused from PX4's BSD-3-Clause x500 gz model
-  (github.com/PX4/PX4-gazebo-models), converted here to URDF/xacro: base_link
-  (carbon frame + four static motor housings + box colliders) plus four spinning
-  rotors on continuous joints. Quad-X spin (PX4 quad_x convention): front-right &
-  rear-left CCW, front-left & rear-right CW.
+  Everything about the vehicle comes from the config (which parts, where)
+  and from the part macros (geometry, inertia). No Gazebo tags or plugins
+  here; x500_gazebo composes the simulation model from the same config.
 
-  Pure description - NO Gazebo tags or plugins (those live in x500_gazebo). The
-  meshes are the PX4 / NXP-HoverGames frame, a close PLACEHOLDER; the 3D artist
-  will deliver the true Holybro X500 shell as glTF PBR. See ASSETS.md.
+      xacro x500.urdf.xacro > x500.urdf                     # default loadout
+      xacro x500.urdf.xacro config_file:=/path/my_loadout.yaml  # custom
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="x500">
 
-  <xacro:include filename="accessories.xacro"/>
+  <xacro:include filename="$(find holybro_parts)/urdf/assembly.xacro"/>
 
-  <!-- Config file: REMAP'd to the source config at build time; the default is the
-       installed copy for manual/runtime use. -->
-  <xacro:arg name="config_file" default="$(find x500_description)/config/x500.yaml"/>
+  <!-- Config file: REMAP'd to the source config at build time; the default
+       is the installed copy for manual/runtime use. -->
+  <xacro:arg name="config_file"
+             default="$(find x500_description)/config/x500.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
 
-  <!-- One static lower motor housing (part of the frame). -->
-  <xacro:macro name="motor_housing" params="xyz">
-    <visual>
-      <origin xyz="${xyz}" rpy="0 0 -0.45"/>
-      <geometry>
-        <mesh filename="package://x500_description/meshes/5010Base.dae"/>
-      </geometry>
-    </visual>
-  </xacro:macro>
-
-  <!-- One rotor: prop + rotating motor bell on a continuous joint spinning about
-       +Z. `spin` selects the ccw/cw prop mesh (chirality matches turningDirection). -->
-  <xacro:macro name="rotor" params="number xyz spin">
-    <link name="rotor_${number}">
-      <inertial>
-        <mass value="0.016076923076923075"/>
-        <inertia ixx="3.8464910483993325e-07" ixy="0" ixz="0"
-                 iyy="2.6115851691700804e-05" iyz="0" izz="2.649858234714004e-05"/>
-      </inertial>
-      <visual>
-        <origin xyz="-0.022 -0.14638461538461536 -0.016" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://x500_description/meshes/1345_prop_${spin}.stl"
-                scale="0.8461538461538461 0.8461538461538461 0.8461538461538461"/>
-        </geometry>
-        <material name="rotor_grey"><color rgba="0.25 0.25 0.25 1"/></material>
-      </visual>
-      <visual>
-        <origin xyz="0 0 -0.032" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://x500_description/meshes/5010Bell.dae"/>
-        </geometry>
-      </visual>
-      <collision>
-        <geometry>
-          <box size="0.2792307692307692 0.016923076923076923 0.0008461538461538462"/>
-        </geometry>
-      </collision>
-    </link>
-    <joint name="rotor_${number}_joint" type="continuous">
-      <parent link="base_link"/>
-      <child link="rotor_${number}"/>
-      <origin xyz="${xyz}" rpy="0 0 0"/>
-      <axis xyz="0 0 1"/>
-    </joint>
-  </xacro:macro>
-
-  <!-- ===================== Base link (frame) ===================== -->
-  <link name="base_link">
-    <inertial>
-      <!-- Bare airframe (frame + motors + core avionics). The battery and payload
-           come from config accessories, making up the ~2 kg all-up weight. Inertia
-           is PX4's lumped value (dominated by the peripheral arms/motors we keep),
-           an approximation for the airframe alone - refine with a real breakdown. -->
-      <mass value="1.1"/>
-      <inertia ixx="0.02166666666666667" ixy="0" ixz="0"
-               iyy="0.02166666666666667" iyz="0" izz="0.04000000000000001"/>
-    </inertial>
-
-    <!-- Carbon frame; the mesh carries its CF.png diffuse texture. -->
-    <visual>
-      <origin xyz="0 0 0.025" rpy="0 0 3.141592654"/>
-      <geometry>
-        <mesh filename="package://x500_description/meshes/NXP-HGD-CF.dae"/>
-      </geometry>
-    </visual>
-
-    <!-- Four static lower motor housings (upper bells spin with the rotors). -->
-    <xacro:motor_housing xyz="0.174 0.174 0.032"/>
-    <xacro:motor_housing xyz="-0.174 0.174 0.032"/>
-    <xacro:motor_housing xyz="0.174 -0.174 0.032"/>
-    <xacro:motor_housing xyz="-0.174 -0.174 0.032"/>
-
-    <!-- Colliders (PX4 boxes): central body + two angled legs + two feet. -->
-    <collision name="body">
-      <origin xyz="0 0 0.007" rpy="0 0 0"/>
-      <geometry><box size="0.35355339059327373 0.35355339059327373 0.05"/></geometry>
-    </collision>
-    <collision name="leg_port">
-      <origin xyz="0 -0.098 -0.123" rpy="-0.35 0 0"/>
-      <geometry><box size="0.015 0.015 0.21"/></geometry>
-    </collision>
-    <collision name="leg_stbd">
-      <origin xyz="0 0.098 -0.123" rpy="0.35 0 0"/>
-      <geometry><box size="0.015 0.015 0.21"/></geometry>
-    </collision>
-    <collision name="foot_port">
-      <origin xyz="0 -0.132 -0.2195" rpy="0 0 0"/>
-      <geometry><box size="0.25 0.015 0.015"/></geometry>
-    </collision>
-    <collision name="foot_stbd">
-      <origin xyz="0 0.132 -0.2195" rpy="0 0 0"/>
-      <geometry><box size="0.25 0.015 0.015"/></geometry>
-    </collision>
-  </link>
-
-  <!-- ===================== Rotors (quad-X) ===================== -->
-  <xacro:rotor number="0" xyz="0.174 -0.174 0.06"  spin="ccw"/>  <!-- front-right -->
-  <xacro:rotor number="1" xyz="-0.174 0.174 0.06"  spin="ccw"/>  <!-- rear-left  -->
-  <xacro:rotor number="2" xyz="0.174 0.174 0.06"   spin="cw"/>   <!-- front-left -->
-  <xacro:rotor number="3" xyz="-0.174 -0.174 0.06" spin="cw"/>   <!-- rear-right -->
-
-  <!-- ===================== Accessories (from config) ===================== -->
-  <xacro:mount_accessories items="${cfg.get('accessories', [])}"/>
+  <!-- Airframe as the root; its slots fill with their defaults, the config
+       overrides and adds. -->
+  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                  slots="${cfg.get('slots') or []}"/>
 
 </robot>

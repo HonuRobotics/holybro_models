@@ -53,7 +53,7 @@ def test_model_loaded(sim):
 
 def test_sensor_topics_advertised(sim):
     """The flight-sensor topics and world clock are advertised."""
-    needed = ('/x500/imu', '/x500/air_pressure', '/x500/mag', '/x500/gps',
+    needed = ('/x500/imu', '/x500/air_pressure', '/x500/mag', '/x500/gps/fix',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
@@ -79,6 +79,6 @@ def test_imu_publishes_data(sim):
 
 def test_gps_publishes_fix(sim):
     """The NavSat sensor resolves the world spherical coordinates to a fix."""
-    code, out, err = gz(sim, 'topic', '-e', '-t', '/x500/gps', '-n', '1',
+    code, out, err = gz(sim, 'topic', '-e', '-t', '/x500/gps/fix', '-n', '1',
                         timeout=30)
     assert code == 0 and 'latitude_deg' in out, f'no GPS fix\n{err}'

@@ -1,52 +1,139 @@
 <?xml version="1.0"?>
 <!--
-  Simulation-ready Holybro X500 model, GENERATED from model.sdf.xacro at build
-  time. Merge-includes the x500_description geometry and adds the Gazebo plugins:
-  one MulticopterMotorModel per rotor (the actuator plant) + the flight sensors
-  (IMU / air-pressure / magnetometer / NavSat). NO control layer (no autopilot /
-  velocity controller / cmd wiring) - the motors idle until something publishes
-  gz.msgs.Actuators on <namespace>/command/motor_speed. Motor constants + sensor
-  noise are PX4's (BSD-3) x500 values. The sensor *system* plugins live in the
-  world (x500_playground.sdf), like PX4's server.config.
+  Simulation ready Holybro X500 model, GENERATED from config/x500.yaml at
+  build time. It merge includes the x500_description geometry (assembled
+  from holybro_parts) and adds the Gazebo plugins: one MulticopterMotorModel
+  per propeller part, the airframe flight sensors (IMU / air pressure /
+  magnetometer) and one NavSat per GPS part, all placed by the same assembly
+  resolution the URDF went through. NO control layer: the motors idle until
+  something publishes gz.msgs.Actuators on <namespace>/command/motor_speed.
+  The sensor *system* plugins live in the world, like PX4's server.config.
 
-  In a world:  <include><uri>model://x500_gazebo</uri></include>
+  In a world:  <include><uri>model://x500</uri></include>
 -->
 <sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- The assembly dispatcher, run here with Gazebo side emitters. -->
+  <xacro:include filename="$(find holybro_parts)/urdf/assembly.xacro"/>
 
   <xacro:arg name="config_file"
              default="$(find x500_description)/config/x500.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+  <!-- The URDF to merge: the build installed one, or (configure_vehicle.py,
+       launch time loadouts) a file:// URI of one generated from the same
+       config. -->
+  <xacro:arg name="urdf_uri" default="model://x500/x500.urdf"/>
 
-  <!-- Topic namespace for the flight-sensor topics (the bridge config is
-       generated from the same yaml, so gz and ROS sides stay in sync). -->
+  <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
+       on both sides (a GPS part's /fix). Per part, `gz_topic` / `topic`
+       override the gz side base; the bridge config is generated from the
+       same yaml, so gz and ROS sides stay in sync. -->
   <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'x500')}"/>
+  <!-- The root link the assembly names (the config's base.name). -->
+  <xacro:property name="base_name" value="${cfg['base'].get('name', 'base_link')}"/>
 
-  <!-- One rotor's motor model. ccw props take turningDirection ccw, cw take cw;
-       thrust = motorConstant * (motorRotVel * rotorVelocitySlowdownSim)^2. -->
-  <xacro:macro name="motor" params="number spin">
+  <!-- Config entry that fitted an instance, or {} (slot entries default
+       their name to the slot). -->
+  <xacro:macro name="part_entry" params="name">
+    <xacro:property name="ovr"
+                    value="${[e for e in (cfg.get('parts') or []) if e.get('name', e.get('slot')) == name]}"/>
+    <xacro:property name="entry" scope="parent" value="${ovr[0] if ovr else dict()}"/>
+  </xacro:macro>
+
+  <!-- A propeller part drives its mounting joint: one MulticopterMotorModel
+       per propeller instance, with the plant constants the part declares in
+       its `drive` table. The actuator index in the command bus
+       (gz.msgs.Actuators on /<ns>/command/motor_speed) is the trailing
+       number of the instance name, which is why the rotor slots are named
+       rotor_0 .. rotor_3 and their occupants must keep those names. -->
+  <xacro:macro name="rotor_motor" params="name drive">
+    <xacro:if value="${not name.split('_')[-1].isdigit()}">
+      <xacro:assembly_fail message="rotor instance '${name}' must end in its actuator number (rotor_0 .. rotor_3)"/>
+    </xacro:if>
     <plugin filename="gz-sim-multicopter-motor-model-system"
             name="gz::sim::systems::MulticopterMotorModel">
-      <robotNamespace>x500</robotNamespace>
-      <jointName>rotor_${number}_joint</jointName>
-      <linkName>rotor_${number}</linkName>
-      <turningDirection>${spin}</turningDirection>
-      <timeConstantUp>0.0125</timeConstantUp>
-      <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1000.0</maxRotVelocity>
-      <motorConstant>8.54858e-06</motorConstant>
-      <momentConstant>0.016</momentConstant>
+      <robotNamespace>${topic_ns}</robotNamespace>
+      <jointName>${name}_joint</jointName>
+      <linkName>${name}</linkName>
+      <turningDirection>${drive['rotation']}</turningDirection>
+      <timeConstantUp>${drive['time_constant_up']}</timeConstantUp>
+      <timeConstantDown>${drive['time_constant_down']}</timeConstantDown>
+      <maxRotVelocity>${drive['max_rot_velocity']}</maxRotVelocity>
+      <motorConstant>${drive['motor_constant']}</motorConstant>
+      <momentConstant>${drive['moment_constant']}</momentConstant>
       <commandSubTopic>command/motor_speed</commandSubTopic>
-      <motorNumber>${number}</motorNumber>
-      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
-      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorNumber>${name.split('_')[-1]}</motorNumber>
+      <rotorDragCoefficient>${drive['rotor_drag_coefficient']}</rotorDragCoefficient>
+      <rollingMomentCoefficient>${drive['rolling_moment_coefficient']}</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>${drive['velocity_slowdown_sim']}</rotorVelocitySlowdownSim>
       <motorType>velocity</motorType>
     </plugin>
   </xacro:macro>
 
+  <!-- ===================== Sensors (config driven) =====================
+       One <sensor> per sensor part, as a massless link fixed to the root
+       link at the frame the part declares (keeps the description Gazebo
+       free). The URDF conversion lumps the part into the root link but
+       keeps every frame by name, so the sensor follows the part wherever
+       the config mounted it. -->
+  <xacro:macro name="sensor_link" params="name frame *sensor">
+    <link name="${name}_sensor">
+      <pose relative_to="${frame}">0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <xacro:insert_block name="sensor"/>
+    </link>
+    <joint name="${name}_sensor_joint" type="fixed">
+      <parent>${base_name}</parent>
+      <child>${name}_sensor</child>
+    </joint>
+  </xacro:macro>
+
+  <!-- GPS part: a NavSat sensor at the part's antenna frame. Needs the
+       navsat system plugin + spherical coordinates in the world. -->
+  <xacro:macro name="navsat_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
+      <sensor name="${name}" type="navsat">
+        <!-- Pin frame_id to the part's antenna frame: a URDF link, so TF
+             carries it. -->
+        <frame_id>${frame}</frame_id>
+        <topic>${topic_base}/fix</topic>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
+       propeller (a part with a `drive` table) gets a motor plugin on its
+       joint, a GPS mast gets its NavSat, every other part is geometry only
+       and emits nothing here. Topic overrides come from the config entry
+       that fitted the instance. Ad hoc slots are URDF frames; nothing to
+       emit. -->
+  <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">
+    <xacro:part_entry name="${name}"/>
+    <xacro:property name="topic_base"
+                    value="${entry.get('gz_topic', entry.get('topic', topic_ns + '/' + name))}"/>
+    <!-- A propeller on a fixed joint (a spare, say) is lumped away and
+         drives nothing. -->
+    <xacro:if value="${'drive' in info and joint != 'fixed'}">
+      <xacro:rotor_motor name="${name}" drive="${info['drive']}"/>
+    </xacro:if>
+    <xacro:if value="${ptype == 'gps_mast'}">
+      <xacro:navsat_sensor name="${name}" frame="${name}_antenna" topic_base="${topic_base}"/>
+    </xacro:if>
+  </xacro:macro>
+  <xacro:macro name="gz_no_slot" params="name parent xyz rpy:='0 0 0'">
+  </xacro:macro>
+
   <model name="x500">
     <include merge="true">
-      <uri>package://x500_description/urdf/x500.urdf</uri>
+      <uri>$(arg urdf_uri)</uri>
     </include>
 
     <!-- Joint states for the rotor joints, so robot_state_publisher can
@@ -56,11 +143,12 @@
       <topic>${topic_ns}/joint_states</topic>
     </plugin>
 
-    <!-- Flight sensors on a body-fixed massless link at the CG (rigidly equal to
-         being on base_link; data is reported in the base_link frame). Backends are
-         the *-system plugins in the world. PX4 (BSD-3) noise values. -->
+    <!-- Airframe flight sensors (autopilot IMU / baro / mag) on a body
+         fixed massless link at the root: they belong to the airframe, not
+         to a fitted part. Backends are the *-system plugins in the world.
+         PX4 (BSD 3) noise values. -->
     <link name="flight_sensors">
-      <pose relative_to="base_link">0 0 0 0 0 0</pose>
+      <pose relative_to="${base_name}">0 0 0 0 0 0</pose>
       <inertial>
         <mass>1e-5</mass>
         <inertia>
@@ -70,7 +158,7 @@
       </inertial>
 
       <sensor name="imu" type="imu">
-        <frame_id>base_link</frame_id>
+        <frame_id>${base_name}</frame_id>
         <topic>${topic_ns}/imu</topic>
         <always_on>1</always_on>
         <update_rate>250</update_rate>
@@ -89,7 +177,7 @@
       </sensor>
 
       <sensor name="air_pressure" type="air_pressure">
-        <frame_id>base_link</frame_id>
+        <frame_id>${base_name}</frame_id>
         <topic>${topic_ns}/air_pressure</topic>
         <always_on>1</always_on>
         <update_rate>50</update_rate>
@@ -99,7 +187,7 @@
       </sensor>
 
       <sensor name="magnetometer" type="magnetometer">
-        <frame_id>base_link</frame_id>
+        <frame_id>${base_name}</frame_id>
         <topic>${topic_ns}/mag</topic>
         <always_on>1</always_on>
         <update_rate>100</update_rate>
@@ -109,23 +197,16 @@
           <z><noise type="gaussian"><stddev>0.0001</stddev></noise></z>
         </magnetometer>
       </sensor>
-
-      <sensor name="navsat" type="navsat">
-        <frame_id>base_link</frame_id>
-        <topic>${topic_ns}/gps</topic>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-      </sensor>
     </link>
     <joint name="flight_sensors_joint" type="fixed">
-      <parent>base_link</parent>
+      <parent>${base_name}</parent>
       <child>flight_sensors</child>
     </joint>
 
-    <!-- Rotor actuators (quad-X): FR/RL ccw, FL/RR cw. -->
-    <xacro:motor number="0" spin="ccw"/>
-    <xacro:motor number="1" spin="ccw"/>
-    <xacro:motor number="2" spin="cw"/>
-    <xacro:motor number="3" spin="cw"/>
+    <!-- Motors and sensors: one per propeller / GPS part the assembly
+         resolves to. No manifest: that lives in the merged URDF. -->
+    <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                    slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"
+                    manifest="false"/>
   </model>
 </sdf>

@@ -3,20 +3,20 @@ project(x500_description)
 
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
+# The description is assembled from the part library at build time, so it must
+# be installed first: $(find holybro_parts) resolves while expanding.
+find_package(holybro_parts REQUIRED)
 
-# Generate urdf/x500.urdf from the xacro at build time. REMAP passes the source
-# config so accessory edits re-trigger regen (xacro --deps tracks the yaml).
+# Expand the xacro into a concrete URDF at build time. Dependencies are listed
+# EXPLICITLY: the configure time `xacro --deps` snapshot only warns on failure
+# and is not refreshed until the next reconfigure, so on its own a config or
+# include edit can silently fail to regenerate the URDF.
 xacro_add_files(urdf/x500.urdf.xacro
   REMAP config_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/x500.yaml
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/x500.yaml
   INSTALL DESTINATION urdf)
 
-# Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// mesh URIs
-# resolve in Gazebo (RViz resolves package:// via the ament index directly).
-ament_environment_hooks("hooks/resource_paths.dsv.in")
-ament_environment_hooks("hooks/resource_paths.sh.in")
-
 install(DIRECTORY
-  meshes
   urdf
   rviz
   launch

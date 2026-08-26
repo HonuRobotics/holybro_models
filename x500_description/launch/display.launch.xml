@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-  Visualize the X500 description in RViz: robot_state_publisher (build-time URDF),
+  Visualize the X500 description in RViz: robot_state_publisher (build time URDF),
   joint_state_publisher_gui (sliders to spin the four rotors) and RViz with the
   packaged config. Pure ROS/description - no Gazebo.
 -->
@@ -9,7 +9,7 @@
        description="Start joint_state_publisher_gui to drive the rotor joints."/>
   <arg name="config_file"
        default="$(find-pkg-share x500_description)/config/x500.yaml"
-       description="Vehicle config (accessories) expanded at launch."/>
+       description="Vehicle loadout config, expanded at launch."/>
 
   <node pkg="robot_state_publisher" exec="robot_state_publisher"
         name="robot_state_publisher">

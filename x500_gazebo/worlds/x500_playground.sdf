@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <!--
-  Minimal aerial world for the X500: sun, a ground plane, the core systems and the
-  flight-sensor backends (IMU / air-pressure / magnetometer / NavSat). No control -
-  the quad rests on its landing gear until something publishes motor commands.
+  The ground world with the default X500 already in it. No control: the
+  quad rests on its landing gear until something publishes motor commands.
 
   Run it directly, no ROS:  gz sim <this file>
 -->
@@ -71,9 +70,9 @@
       </link>
     </model>
 
-    <!-- The quad, pulled in from x500_gazebo (the composed model). -->
+    <!-- The quad, the composed model of the default loadout. -->
     <include>
-      <uri>model://x500_gazebo</uri>
+      <uri>model://x500</uri>
       <name>x500</name>
       <pose>0 0 0.25 0 0 0</pose>
     </include>

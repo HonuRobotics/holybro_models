@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+  prop_1345_cw part macro: a 1345 propeller with its rotating motor bell,
+  the clockwise rotor of the X500 quad X pair.
+
+  Mesh, inertia and collision are PX4's BSD 3 Clause x500 values
+  (models/LICENSE); the bell is the HoverGames 5010, a placeholder for the
+  Holybro 2216. Drive: the multicopter motor plant constants a simulator
+  needs to spin this prop on its joint (PX4's values; identify for the
+  real 2216 + 1045 pair).
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="prop_1345_cw_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ),
+        drive=dict(rotation='cw', motor_constant=8.54858e-06, moment_constant=0.016,
+                   max_rot_velocity=1000.0, time_constant_up=0.0125, time_constant_down=0.025,
+                   rotor_drag_coefficient=8.06428e-05, rolling_moment_coefficient=1e-06,
+                   velocity_slowdown_sim=10))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="prop_1345_cw"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+    <xacro:prop_1345_cw_info/>
+
+    <link name="${name}">
+      <inertial>
+        <mass value="0.016076923076923075"/>
+        <inertia ixx="3.8464910483993325e-07" ixy="0" ixz="0"
+                 iyy="2.6115851691700804e-05" iyz="0" izz="2.649858234714004e-05"/>
+      </inertial>
+      <visual>
+        <origin xyz="-0.022 -0.14638461538461536 -0.016" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://holybro_parts/models/prop_1345_cw/1345_prop_cw.stl"
+                scale="0.8461538461538461 0.8461538461538461 0.8461538461538461"/>
+        </geometry>
+        <material name="${name}_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+      </visual>
+      <visual>
+        <origin xyz="0 0 -0.032" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://holybro_parts/models/prop_1345_cw/5010Bell.dae"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <geometry>
+            <box size="0.2792307692307692 0.016923076923076923 0.0008461538461538462"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>
