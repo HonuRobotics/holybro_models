@@ -1,9 +1,11 @@
 # Vehicles
 
-One manual per vehicle: running, driving, sensors and configuration.
+```{toctree}
+:hidden:
 
-```{admonition} Draft
-:class: note
-
-This section is being written.
+x500
 ```
+
+| Vehicle | Packages | Manual |
+|---|---|---|
+| Holybro X500 V2 quadcopter | `x500_description`, `x500_gazebo` | [X500](x500.md) |

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+  Holybro X500 V2 quadcopter, assembled from holybro_parts.
+
+  Everything about the vehicle comes from the config (which parts, where)
+  and from the part macros (geometry, inertia). No Gazebo tags or plugins
+  here; x500_gazebo composes the simulation model from the same config.
+
+      xacro x500.urdf.xacro > x500.urdf                     # default loadout
+      xacro x500.urdf.xacro config_file:=/path/my_loadout.yaml  # custom
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="x500">
+
+  <xacro:include filename="$(find holybro_parts)/urdf/assembly.xacro"/>
+
+  <!-- Config file: REMAP'd to the source config at build time; the default
+       is the installed copy for manual/runtime use. -->
+  <xacro:arg name="config_file"
+             default="$(find x500_description)/config/x500.yaml"/>
+  <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+
+  <!-- Airframe as the root; its slots fill with their defaults, the config
+       overrides and adds. -->
+  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                  slots="${cfg.get('slots') or []}"/>
+
+</robot>

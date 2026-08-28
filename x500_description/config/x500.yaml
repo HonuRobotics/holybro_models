@@ -1,0 +1,47 @@
+# X500 build time configuration.
+#
+# Edit this file and rebuild (colcon build) to regenerate the URDF, the
+# composed Gazebo model AND the ros_gz bridge config. To try a loadout
+# without rebuilding, pass config_file:=<your.yaml> to the launches.
+#
+# The default X500 needs nothing here: every slot of every part fills
+# itself with its default (the airframe fits its four rotors, the battery
+# and the GPS mast). The entries below are how to change that. See
+# holybro_parts/urdf/assembly.xacro for the full rules and the site
+# (vehicles/x500/configuration) for the slots and the catalog.
+#
+# Topic namespace: part topics default to /<topic_namespace>/<name>/...
+topic_namespace: x500
+
+# base: the part whose link is the assembly root, base_link.
+base: {type: x500_airframe, name: base_link}
+
+# parts: overrides and additions. A slot entry picks what goes in a slot
+# (slot: the slot name, of: the instance carrying it, default base_link;
+# type: an accepted part type, or none to leave it empty). An entry without
+# slot: is a free placement: type, name, xyz/rpy relative to parent
+# (default base_link). Optional per part topic overrides for parts with
+# topics (bases; the per part suffix such as /fix is appended):
+#   topic:     base for BOTH the Gazebo and ROS sides
+#   gz_topic:  Gazebo side base   (overrides `topic`)
+#   ros_topic: ROS side base      (overrides `topic`)
+#   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
+#              generated bridge entries
+#
+# NOTE: keep the rotor instances named rotor_0 .. rotor_3 (the defaults);
+# the motor command bus indexes actuators by that number.
+parts: []
+  # - {slot: gps, type: none}                                  # no GPS mast
+  # - {slot: companion, type: companion_computer}              # slots with no default
+  # - {slot: gimbal, type: gimbal_camera}
+  # - {slot: gps, type: gps_mast, topic: rtk}                  # rename the GPS topics
+  # - {type: battery_4s, name: battery_aft, xyz: "-0.09 0 -0.045", rpy: "0 0 0"}
+
+# slots: ad hoc slots on any instance, usable like the parts' own. (The
+# instance key is of:, not on:, which YAML would read as the boolean true.)
+# slots:
+#   - {of: base_link, name: camera, xyz: "0.12 0 0.02", rpy: "0 0 0"}
+
+# extra_bridge_topics: optional top level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax. Never hand edit
+# the generated ros_gz_bridge.yaml; it is overwritten on rebuild.

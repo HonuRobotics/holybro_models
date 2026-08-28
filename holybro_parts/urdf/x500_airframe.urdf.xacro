@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<!--
+  x500_airframe part macro: the Holybro X500 V2 frame kit as one rigid body
+  (carbon top/bottom plates, four arms with their static lower motor
+  housings, landing gear), the assembly root of the X500.
+
+  Geometry, inertia and collision boxes are reused from PX4's BSD 3 Clause
+  x500 gz model (github.com/PX4/PX4-gazebo-models); the frame mesh is the
+  NXP HoverGames body, a close PLACEHOLDER for the true X500 V2 shell
+  (models/LICENSE). Mass is the bare airframe; the battery and payload
+  parts make up the rest of the all up weight.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+  Slots other parts fit into, as frames <name>_<slot>:
+    rotor_0 .. rotor_3: quad X rotors (PX4 order: 0 front right ccw,
+      1 rear left ccw, 2 front left cw, 3 rear right cw); the rotor index
+      feeds the motor command bus, so keep the default instance names
+    battery: battery_4s; default battery_4s
+    companion: companion_computer; default none
+    gps: gps_mast; default gps_mast
+    gimbal: gimbal_camera; default none
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="x500_airframe_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+            rotor_0=dict(xyz='0.174 -0.174 0.06', rpy='0 0 0', accepts=['prop_1345_ccw'], default='prop_1345_ccw'),
+            rotor_1=dict(xyz='-0.174 0.174 0.06', rpy='0 0 0', accepts=['prop_1345_ccw'], default='prop_1345_ccw'),
+            rotor_2=dict(xyz='0.174 0.174 0.06', rpy='0 0 0', accepts=['prop_1345_cw'], default='prop_1345_cw'),
+            rotor_3=dict(xyz='-0.174 -0.174 0.06', rpy='0 0 0', accepts=['prop_1345_cw'], default='prop_1345_cw'),
+            battery=dict(xyz='0 0 -0.045', rpy='0 0 0', accepts=['battery_4s'], default='battery_4s'),
+            companion=dict(xyz='-0.05 0 0.045', rpy='0 0 0', accepts=['companion_computer'], default='none'),
+            gps=dict(xyz='-0.11 0 0.045', rpy='0 0 0', accepts=['gps_mast'], default='gps_mast'),
+            gimbal=dict(xyz='0.12 0 -0.05', rpy='0 0 0', accepts=['gimbal_camera'], default='none'),
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <!-- One static lower motor housing (part of the frame; the bells spin
+       with the props). -->
+  <xacro:macro name="x500_motor_housing" params="xyz">
+    <visual>
+      <origin xyz="${xyz}" rpy="0 0 -0.45"/>
+      <geometry>
+        <mesh filename="package://holybro_parts/models/x500_airframe/5010Base.dae"/>
+      </geometry>
+    </visual>
+  </xacro:macro>
+
+  <xacro:macro name="x500_airframe"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+    <xacro:x500_airframe_info/>
+
+    <link name="${name}">
+      <inertial>
+        <!-- Bare airframe (frame + motors + core avionics); PX4's lumped
+             tensor, dominated by the peripheral arms/motors we keep. Refine
+             with a real breakdown. -->
+        <mass value="1.1"/>
+        <inertia ixx="0.02166666666666667" ixy="0" ixz="0"
+                 iyy="0.02166666666666667" iyz="0" izz="0.04000000000000001"/>
+      </inertial>
+      <!-- Carbon frame; the mesh carries its CF.png diffuse texture. -->
+      <visual>
+        <origin xyz="0 0 0.025" rpy="0 0 3.141592654"/>
+        <geometry>
+          <mesh filename="package://holybro_parts/models/x500_airframe/NXP-HGD-CF.dae"/>
+        </geometry>
+      </visual>
+      <xacro:x500_motor_housing xyz="0.174 0.174 0.032"/>
+      <xacro:x500_motor_housing xyz="-0.174 0.174 0.032"/>
+      <xacro:x500_motor_housing xyz="0.174 -0.174 0.032"/>
+      <xacro:x500_motor_housing xyz="-0.174 -0.174 0.032"/>
+      <xacro:if value="${collision}">
+        <!-- PX4 boxes: central body + two angled legs + two feet. -->
+        <collision name="body">
+          <origin xyz="0 0 0.007" rpy="0 0 0"/>
+          <geometry><box size="0.35355339059327373 0.35355339059327373 0.05"/></geometry>
+        </collision>
+        <collision name="leg_port">
+          <origin xyz="0 -0.098 -0.123" rpy="-0.35 0 0"/>
+          <geometry><box size="0.015 0.015 0.21"/></geometry>
+        </collision>
+        <collision name="leg_stbd">
+          <origin xyz="0 0.098 -0.123" rpy="0.35 0 0"/>
+          <geometry><box size="0.015 0.015 0.21"/></geometry>
+        </collision>
+        <collision name="foot_port">
+          <origin xyz="0 -0.132 -0.2195" rpy="0 0 0"/>
+          <geometry><box size="0.25 0.015 0.015"/></geometry>
+        </collision>
+        <collision name="foot_stbd">
+          <origin xyz="0 0.132 -0.2195" rpy="0 0 0"/>
+          <geometry><box size="0.25 0.015 0.015"/></geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+  gps_mast part macro: a GPS/RTK module on a mast: thin mast plus puck on top. One parametric mount covers the M8N to M10 to F9P family (retune mass/height per module).
+
+  Sized primitive placeholder (dims from product pages); swap for a real
+  mesh when delivered. Mass and pose matter: accessories set the vehicle
+  center of gravity.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+  Reference frames, as <name>_<frame>: antenna (the puck, where a
+  simulator places the NavSat sensor).
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="gps_mast_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+            antenna=dict(xyz='0 0 0.13', rpy='0 0 0'),
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="gps_mast"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+    <xacro:gps_mast_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0 0 0.06" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <!-- Slender mast (r 5 mm, l 0.12 m) about its centre; puck negligible. -->
+        <inertia ixx="${0.05/12.0 * (3*0.005**2 + 0.12**2)}" ixy="0" ixz="0"
+                 iyy="${0.05/12.0 * (3*0.005**2 + 0.12**2)}" iyz="0"
+                 izz="${0.05/2.0 * 0.005**2}"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0.06" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.005" length="0.12"/></geometry>
+        <material name="${name}_mast"><color rgba="0.15 0.15 0.15 1"/></material>
+      </visual>
+      <visual>
+        <origin xyz="0 0 0.13" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.028" length="0.018"/></geometry>
+        <material name="${name}_puck"><color rgba="0.85 0.85 0.85 1"/></material>
+      </visual>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

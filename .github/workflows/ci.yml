@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [lyrical]
+  pull_request:
+
+jobs:
+  build:
+    # Fail fast if an apt/rosdep mirror hangs instead of erroring; normal runs
+    # finish in a few minutes.
+    timeout-minutes: 30
+    # The prebuilt ros-base image ships colcon, rosdep and vcstool, replacing a
+    # from-scratch ROS install on every run; rosdep then only adds the deltas
+    # (ros_gz, gz vendor packages, test deps). Build/test are explicit steps
+    # (not action-ros-ci, whose pinned releases hardcode a distro whitelist
+    # that lags new ROS releases).
+    runs-on: ubuntu-latest
+    container:
+      image: ros:lyrical-ros-base
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # Make apt fail-and-retry instead of hanging when a mirror wedges
+      # (packages.ros.org flakiness otherwise stalls rosdep).
+      - name: Harden apt against hung mirrors
+        run: |
+          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            > /etc/apt/apt.conf.d/80-network-hardening
+      - uses: actions/checkout@v4
+        with:
+          path: src/holybro_models
+      - name: Install dependencies
+        run: |
+          apt-get update
+          rosdep update
+          rosdep install --from-paths src -y --ignore-src
+      - name: Build
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          # merge-install is the project standard layout (see the README).
+          colcon build --merge-install --event-handlers console_cohesion+
+      - name: Test
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          colcon test --merge-install --event-handlers console_cohesion+
+          colcon test-result --verbose
+      # Full colcon logs (per-test stdout included) for auditing, pass or fail.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-logs
+          path: log/
