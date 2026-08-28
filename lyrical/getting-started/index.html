@@ -46,12 +46,45 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How to guides</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../design/index.html">Design</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#first-simulation">First simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/x500.html">X500</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#the-default-loadout">The default loadout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#running">Running</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#driving">Driving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#sensors">Sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How to guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#change-the-loadout">Change the loadout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#add-a-part">Add a part</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#parts-catalog">Parts catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#topics">Topics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#packages">Packages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design/index.html#assets">Assets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../project/index.html#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../project/index.html#releases">Releases</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -80,11 +113,51 @@
              
   <section id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
-<p>Requirements, installation and a first simulation.</p>
-<div class="note admonition">
-<p class="admonition-title">Draft</p>
-<p>This section is being written.</p>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ROS 2 Lyrical on Ubuntu 26.04</p></li>
+<li><p>Gazebo Jetty, installed as ROS 2 Lyrical’s <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code> dependency (the
+packages talk to Gazebo only through <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code>)</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>Into a colcon workspace:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/ws/src
+<span class="nb">cd</span><span class="w"> </span>~/ws/src
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/HonuRobotics/holybro_models.git
+<span class="nb">cd</span><span class="w"> </span>~/ws
+rosdep<span class="w"> </span>update
+rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span class="w"> </span>src<span class="w"> </span>--ignore-packages-from-source<span class="w"> </span>--default-yes
+colcon<span class="w"> </span>build<span class="w"> </span>--merge-install
+<span class="nb">source</span><span class="w"> </span>install/setup.bash
+</pre></div>
 </div>
+<p>The project standard is <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">build</span> <span class="pre">--merge-install</span></code>; the default isolated
+layout also works. Binary debs are planned once the packages are released
+into the ROS ecosystem; a released vehicle can then be reconfigured without
+rebuilding (see <a class="reference internal" href="../how-to/index.html"><span class="std std-doc">Change the loadout</span></a>).</p>
+</section>
+<section id="first-simulation">
+<h2>First simulation<a class="headerlink" href="#first-simulation" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml
+</pre></div>
+</div>
+<p>Gazebo opens with the X500 resting on its landing gear. The model carries
+no control layer: the rotors idle until something publishes
+<code class="docutils literal notranslate"><span class="pre">gz.msgs.Actuators</span></code> on <code class="docutils literal notranslate"><span class="pre">/x500/command/motor_speed</span></code> (that is the autopilot’s
+job; PX4 SITL, ArduPilot SITL or a custom controller). The flight sensors
+publish right away:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/x500/imu<span class="w"> </span>--once
+ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/x500/gps/fix<span class="w"> </span>--once
+</pre></div>
+</div>
+<p>To see the model in RViz instead:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_description<span class="w"> </span>display.launch.xml
+</pre></div>
+</div>
+</section>
 </section>
 
 

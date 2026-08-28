@@ -46,12 +46,45 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How to guides</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Design</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/index.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/index.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/index.html#first-simulation">First simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/x500.html">X500</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#the-default-loadout">The default loadout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#running">Running</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#driving">Driving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#sensors">Sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500.html#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How to guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#change-the-loadout">Change the loadout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#add-a-part">Add a part</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#parts-catalog">Parts catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#topics">Topics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#packages">Packages</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#assets">Assets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../project/index.html#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../project/index.html#releases">Releases</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -80,11 +113,34 @@
              
   <section id="design">
 <h1>Design<a class="headerlink" href="#design" title="Link to this heading"></a></h1>
-<p>How the models are built and why.</p>
-<div class="note admonition">
-<p class="admonition-title">Draft</p>
-<p>This section is being written.</p>
-</div>
+<p>The X500 is built from a <strong>part library</strong> (<code class="docutils literal notranslate"><span class="pre">holybro_parts</span></code>): each part is a
+hand maintained URDF xacro macro stating its own inertia, visuals,
+collisions, <strong>slots</strong> (where other parts fit, with accepted options and a
+default), <strong>frames</strong> (a sensor’s antenna) and, for propellers, a <strong>drive</strong>
+table (what a simulator needs to spin it). The assembly dispatcher fills
+every slot with its default, applies the config’s overrides, and records
+the result in the URDF as <code class="docutils literal notranslate"><span class="pre">&lt;assembly_part&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;assembly_slot&gt;</span></code> elements,
+a manifest that downstream tooling (the Gazebo composition, the bridge
+generator, the <code class="docutils literal notranslate"><span class="pre">holybro_parts.assembly</span></code> config check) reads instead of
+re-resolving anything. <code class="docutils literal notranslate"><span class="pre">x500_gazebo</span></code> runs the same resolution with Gazebo
+emitters, so a propeller gets its motor plugin and a GPS part its NavSat
+wherever the config mounted them, and the generated bridge can never
+disagree with the model.</p>
+<p>The machinery (the part contract, <code class="docutils literal notranslate"><span class="pre">assembly.xacro</span></code>, the manifest check) is
+shared with
+<a class="reference external" href="https://honurobotics.github.io/bluerobotics_models/">bluerobotics_models</a>,
+where the design is documented in depth (Slots and assembly, Gazebo
+composition); extraction into a common package is planned.</p>
+<section id="assets">
+<h2>Assets<a class="headerlink" href="#assets" title="Link to this heading"></a></h2>
+<p>The meshes are <strong>temporary placeholders</strong> reused from PX4’s
+<a class="reference external" href="https://github.com/PX4/PX4-gazebo-models">PX4-gazebo-models</a> x500 model
+(BSD 3 Clause, <code class="docutils literal notranslate"><span class="pre">holybro_parts/models/LICENSE</span></code>): the frame is the NXP
+HoverGames body, geometrically close to but not the exact Holybro X500 V2
+shell, and the motor bell is the HoverGames 5010. Inertias, rotor poses and
+motor constants are PX4’s matched, hover tuned set. Original Holybro art
+(glTF, PBR) will replace them part by part.</p>
+</section>
 </section>
 
 
