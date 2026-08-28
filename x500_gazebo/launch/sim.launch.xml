@@ -36,7 +36,7 @@
        value="$(command '$(find-pkg-prefix x500_gazebo)/lib/x500_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
   <let name="robot_description" value="$(command 'cat $(var vehicle_dir)/x500.urdf')"/>
 
-  <!-- Gazebo server (composable) — creates the shared container. -->
+  <!-- Gazebo server (composable) creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
              container_name="ros_gz_container"
              create_own_container="true"
