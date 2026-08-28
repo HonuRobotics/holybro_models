@@ -49,7 +49,7 @@
   <node pkg="ros_gz_sim" exec="create" name="spawn_x500" output="screen"
         args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
 
-  <!-- ros_gz bridge (composable) — joins the container. -->
+  <!-- ros_gz bridge (composable) joins the container. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
                  config_file="$(var vehicle_dir)/ros_gz_bridge.yaml"
                  container_name="ros_gz_container"
