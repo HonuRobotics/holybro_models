@@ -33,7 +33,8 @@ the problem and fail the build or the launch.
 
 ## Topics
 
-See [X500: Sensors and Driving](../vehicles/x500.md). `/clock` and
+See the X500 [Sensors](../vehicles/x500/sensors.md) and
+[Actuators](../vehicles/x500/actuators.md) pages. `/clock` and
 `/joint_states` are always bridged; every part topic follows
 `/<namespace>/<instance>/<suffix>` on both sides.
 
