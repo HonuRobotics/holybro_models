@@ -39,6 +39,7 @@ import sys
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import yaml
 
 MODEL_CONFIG = """\
 <?xml version="1.0"?>
@@ -72,6 +73,11 @@ def configure(config, out_dir):
     urdf = out_dir / 'x500.urdf'
     urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}'],
                         'URDF generation'))
+    # robot_state_publisher parameter file, so the launch loads the URDF
+    # without shelling out to read it (portable: no `cat`).
+    (out_dir / 'robot_description.yaml').write_text(yaml.safe_dump(
+        {'robot_state_publisher': {'ros__parameters': {
+            'robot_description': urdf.read_text()}}}))
     sdf = out_dir / 'model.sdf'
     sdf.write_text(run(['xacro', str(gz / 'model.sdf.xacro'),
                         f'config_file:={config}', f'urdf_uri:=file://{urdf}'],
@@ -105,7 +111,7 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote x500.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml to {out_dir}')
+              f'ros_gz_bridge.yaml, robot_description.yaml to {out_dir}')
 
 
 if __name__ == '__main__':
