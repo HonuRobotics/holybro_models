@@ -11,6 +11,8 @@ ground world and the ROS bridge comes up with it. The vehicle rests on
 its landing gear; the rotors idle until an autopilot publishes on the
 motor bus ([Actuators](actuators.md)).
 
+![](../../img/x500.png)
+
 To run a custom vehicle instead, pass a loadout file with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
 [Change the loadout](../../how-to/index.md) walks through writing one.
@@ -24,6 +26,8 @@ SDF:
 
 ```bash
 ros2 launch x500_gazebo sim.launch.xml world:=/path/my_world.sdf
+# for example
+ros2 launch x500_gazebo sim.launch.xml world:="$(ros2 pkg prefix --share x500_gazebo)/worlds/x500_playground.sdf"
 ```
 
 ## In RViz
@@ -33,3 +37,5 @@ To see the model in RViz:
 ```bash
 ros2 launch x500_description display.launch.xml
 ```
+
+![](../../img/rviz.png)

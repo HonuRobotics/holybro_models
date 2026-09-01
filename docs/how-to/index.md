@@ -2,12 +2,19 @@
 
 ## Change the loadout
 
-Copy `x500_description/config/x500.yaml`, edit it and pass it to the
+Copy `x500_description/config/x500.yaml`.
+
+```bash
+cp "$(ros2 pkg prefix --share x500_description)"/config/x500.yaml $HOME/ws/my_loadout.yaml
+```
+
+
+Edit it and pass it to the
 launches; nothing rebuilds:
 
 ```bash
-ros2 launch x500_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
-ros2 launch x500_description display.launch.xml config_file:=/path/my_loadout.yaml
+ros2 launch x500_gazebo sim.launch.xml config_file:=$HOME/ws/my_loadout.yaml
+ros2 launch x500_description display.launch.xml config_file:=$HOME/ws/my_loadout.yaml
 ```
 
 A slot entry picks what goes in a slot (`{slot: gimbal, type: gimbal_camera}`,
@@ -19,7 +26,7 @@ slots go under `slots:`. The instance key for a slot of a non base part is
 ## Generate the artifacts yourself
 
 ```bash
-ros2 run x500_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_x500
+ros2 run x500_gazebo configure_vehicle.py --config $HOME/ws/my_loadout.yaml --out-dir ~/my_x500
 ```
 
 writes the URDF, `model.sdf`, `model.config` and the bridge config; the
@@ -27,7 +34,7 @@ directory works as a `model://` root on `GZ_SIM_RESOURCE_PATH`. To check a
 config against an assembled URDF:
 
 ```bash
-ros2 run holybro_parts check_assembly.py my_loadout.yaml ~/my_x500/x500.urdf
+ros2 run holybro_parts check_assembly.py $HOME/ws/my_loadout.yaml ~/my_x500/x500.urdf
 ```
 
 ## Add a part

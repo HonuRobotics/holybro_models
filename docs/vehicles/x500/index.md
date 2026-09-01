@@ -14,8 +14,12 @@ configuration
 
 ## The default vehicle
 
-The default loadout is the airframe with its four 1345 propellers (PX4
-quad X spin: rotors 0 and 1 counter clockwise, 2 and 3 clockwise), the 4S
-battery and the GPS mast. Everything else in the catalog (companion
+The default loadout is the airframe with:
+
+ - four 1345 propellers (PX4 quad X spin: rotors 0 and 1 counter clockwise, 2 and 3 clockwise), 
+ - the 4S battery
+ - the GPS mast. 
+  
+Everything else in the catalog (companion
 computer, gimbal camera) can be fitted, and the defaults swapped or left
 off ([Configuration](configuration.md)).
