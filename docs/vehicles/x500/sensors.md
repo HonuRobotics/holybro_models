@@ -30,7 +30,12 @@ guide.
 |---|---|---|
 | `/x500/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
 
-Topic bases follow `/<namespace>/<instance>/...`: empty the GPS slot and
-its topic disappears, rename the instance and it follows, and per part
-`topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base.
+These topic names are not fixed strings. Every part topic is built as
+`/<namespace>/<instance>/<suffix>`, so the fix above is the `gps`
+instance publishing `fix` under the `x500` namespace. Change the vehicle
+and the topics change with it:
+
+- Empty the GPS slot and `/x500/gps/fix` goes away with the part.
+- Rename the instance and the topic follows the new name.
+- Set `topic`, `gz_topic` or `ros_topic` on the part in the config to
+  rename the base yourself.
