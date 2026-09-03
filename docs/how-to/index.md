@@ -6,14 +6,15 @@ The vehicle is described by one YAML config, so changing what is fitted
 never means rebuilding. Start from the default config:
 
 ```bash
-cp "$(ros2 pkg prefix --share x500_description)"/config/x500.yaml $HOME/ws/my_loadout.yaml
+mkdir -p $HOME/my_x500
+cp "$(ros2 pkg prefix --share x500_description)"/config/x500.yaml $HOME/my_x500/my_loadout.yaml
 ```
 
 Edit your copy, then hand it to either launch with `config_file:=`:
 
 ```bash
-ros2 launch x500_gazebo sim.launch.xml config_file:=$HOME/ws/my_loadout.yaml
-ros2 launch x500_description display.launch.xml config_file:=$HOME/ws/my_loadout.yaml
+ros2 launch x500_gazebo sim.launch.xml config_file:=$HOME/my_x500/my_loadout.yaml
+ros2 launch x500_description display.launch.xml config_file:=$HOME/my_x500/my_loadout.yaml
 ```
 
 Inside the config there are three ways to place a part:
@@ -40,7 +41,7 @@ Inside the config there are three ways to place a part:
 
 ```{tip}
 To fill a slot on a part other than the base, the instance key is `of:`,
-never `on:` - YAML reads a bare `on` as the boolean `true`.
+never `on:`. YAML reads a bare `on` as the boolean `true`.
 ```
 
 ## Generate the artifacts yourself
@@ -49,7 +50,7 @@ The launches generate everything they need, but you can write the same
 artifacts to a directory of your own:
 
 ```bash
-ros2 run x500_gazebo configure_vehicle.py --config $HOME/ws/my_loadout.yaml --out-dir ~/my_x500
+ros2 run x500_gazebo configure_vehicle.py --config $HOME/my_x500/my_loadout.yaml --out-dir $HOME/my_x500
 ```
 
 That writes `x500.urdf`, `model.sdf`, `model.config`,
@@ -60,7 +61,7 @@ root on `GZ_SIM_RESOURCE_PATH`.
 To confirm a config and an assembled URDF still agree:
 
 ```bash
-ros2 run holybro_parts check_assembly.py $HOME/ws/my_loadout.yaml ~/my_x500/x500.urdf
+ros2 run holybro_parts check_assembly.py $HOME/my_x500/my_loadout.yaml $HOME/my_x500/x500.urdf
 ```
 
 ## Add a part

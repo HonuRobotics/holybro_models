@@ -7,17 +7,18 @@ robot_state_publisher and the Gazebo GUI):
 ros2 launch x500_gazebo sim.launch.xml
 ```
 
-![](../img/x500.png)
+![The X500 quadrotor in Gazebo, resting on its landing gear](../img/x500.png)
 
-Gazebo opens with the X500 resting on its landing gear: 
+Gazebo opens with the X500 resting on its landing gear:
 
- - the airframe, 
- - its four 1345 propellers
- - the 4S battery
-- the GPS mast. 
+- the airframe
+- its four 1345 propellers
+- the 4S battery
+- the GPS mast
 
-That is the default configuration; no configuration was involved. The model carries no control
-layer, so the rotors idle until an autopilot publishes on the motor bus
+That is the default configuration; no configuration was involved. The
+model carries no control layer, so the rotors idle until an autopilot
+publishes on the motor bus
 ([Actuators](../vehicles/x500/actuators.md)).
 
 In a second terminal (also sourced), the flight sensors publish right away:
