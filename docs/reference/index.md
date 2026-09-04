@@ -2,23 +2,55 @@
 
 ## Config schema
 
-The vehicle config is one YAML document:
+The vehicle config is one YAML document with these top level keys:
 
 | Key | Required | Meaning |
 |---|---|---|
+| `base` | yes | the root part everything hangs off |
 | `topic_namespace` | no (`x500`) | prefix of every part topic: `/<ns>/<name>/...` |
-| `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
-| `parts` | no (`[]`) | slot entries and free placements |
-| `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy, accepts, default, joint}` |
-| `extra_bridge_topics` | no | list appended verbatim to the generated bridge config |
+| `parts` | no (`[]`) | the parts to fit: slot entries and free placements |
+| `slots` | no | extra mount points the parts do not declare themselves |
+| `extra_bridge_topics` | no | appended verbatim to the generated bridge config |
 
-A slot entry: `slot`, `of` (instance carrying the slot; not `on`, which YAML
-reads as `true`), `type` (accepted type or `none`), `name` (default: the
-slot name; must be unique), `xyz`/`rpy`, `joint`, `axis`, `collision`, and
-for parts with topics `topic`/`gz_topic`/`ros_topic`/`bridge`. A free
-placement: `type`, `name`, `xyz` (required), `rpy`, `parent` and the same
-optional keys. A key outside the schema is reported as a typo; errors name
-the problem and fail the build or the launch.
+`base` takes `type` (required), `name` (default `base_link`) and
+`collision` (default true).
+
+### Fitting a part
+
+Entries under `parts:` come in two shapes. A **slot entry** drops a part
+into a slot some part already declares; a **free placement** has no
+`slot:` key and bolts the part to a parent at a pose you give.
+
+| Key | Slot entry | Free placement |
+|---|---|---|
+| `slot` | the slot to fill | - |
+| `of` | instance carrying the slot (default `base_link`) | - |
+| `parent` | - | link to attach to (default the base) |
+| `type` | an accepted type, or `none` to leave empty | required |
+| `name` | default: the slot name | required |
+| `xyz`, `rpy` | offset from the slot pose | `xyz` required, `rpy` optional |
+| `joint`, `axis`, `collision` | optional | optional |
+| `topic`, `gz_topic`, `ros_topic`, `bridge` | parts with topics only | parts with topics only |
+
+Instance names must be unique across the vehicle.
+
+```{warning}
+The instance key is `of:`, not `on:`. YAML reads a bare `on` as the
+boolean `true`, so the entry silently means something else.
+```
+
+### Ad hoc slots
+
+Entries under `slots:` add a mount point that no part declares, then fill
+it like any other: `of` (instance, default `base_link`), `name`, `xyz`,
+`rpy`, `accepts`, `default`, `joint`, `collision`.
+
+### Errors
+
+A key outside the schema is reported as a typo rather than ignored, and
+the message names the offending key alongside the ones that were
+expected. Any error fails the build or the launch instead of producing a
+half assembled vehicle.
 
 ## Parts catalog
 
