@@ -94,13 +94,22 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#fitting-a-part">Fitting a part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#ad-hoc-slots">Ad hoc slots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#errors">Errors</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#parts-catalog">Parts catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#topics">Topics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#packages">Packages</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#parts">Parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assembly">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#gazebo">Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#shared-machinery">Shared machinery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assets">Assets</a></li>
 </ul>
 </li>
@@ -148,6 +157,7 @@ a directory under <code class="docutils literal notranslate"><span class="pre">$
 ground world and the ROS bridge comes up with it. The vehicle rests on
 its landing gear; the rotors idle until an autopilot publishes on the
 motor bus (<a class="reference internal" href="actuators.html"><span class="std std-doc">Actuators</span></a>).</p>
+<p><img alt="" src="../../_images/x500.png" /></p>
 <p>To run a custom vehicle instead, pass a loadout file with <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>;
 the <a class="reference internal" href="configuration.html"><span class="std std-doc">configuration page</span></a> lists the slots and
 <a class="reference internal" href="../../how-to/index.html"><span class="std std-doc">Change the loadout</span></a> walks through writing one.</p>
@@ -158,6 +168,8 @@ the <a class="reference internal" href="configuration.html"><span class="std std
 changing anything else about the simulation: pass any vehicle free world
 SDF:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>world:<span class="o">=</span>/path/my_world.sdf
+<span class="c1"># for example</span>
+ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>world:<span class="o">=</span><span class="s2">"</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>x500_gazebo<span class="k">)</span><span class="s2">/worlds/x500_playground.sdf"</span>
 </pre></div>
 </div>
 </section>
@@ -167,6 +179,7 @@ SDF:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_description<span class="w"> </span>display.launch.xml
 </pre></div>
 </div>
+<p><img alt="" src="../../_images/rviz.png" /></p>
 </section>
 </section>
 

@@ -94,13 +94,22 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#fitting-a-part">Fitting a part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#ad-hoc-slots">Ad hoc slots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#errors">Errors</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#parts-catalog">Parts catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#topics">Topics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#packages">Packages</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#parts">Parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assembly">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#gazebo">Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#shared-machinery">Shared machinery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assets">Assets</a></li>
 </ul>
 </li>
@@ -212,10 +221,16 @@ guide.</p>
 </tr>
 </tbody>
 </table>
-<p>Topic bases follow <code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/...</span></code>: empty the GPS slot and
-its topic disappears, rename the instance and it follows, and per part
-<code class="docutils literal notranslate"><span class="pre">topic</span></code> / <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> overrides in the config rename the
-base.</p>
+<p>These topic names are not fixed strings. Every part topic is built as
+<code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/&lt;suffix&gt;</span></code>, so the fix above is the <code class="docutils literal notranslate"><span class="pre">gps</span></code>
+instance publishing <code class="docutils literal notranslate"><span class="pre">fix</span></code> under the <code class="docutils literal notranslate"><span class="pre">x500</span></code> namespace. Change the vehicle
+and the topics change with it:</p>
+<ul class="simple">
+<li><p>Empty the GPS slot and <code class="docutils literal notranslate"><span class="pre">/x500/gps/fix</span></code> goes away with the part.</p></li>
+<li><p>Rename the instance and the topic follows the new name.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">topic</span></code>, <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> or <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> on the part in the config to
+rename the base yourself.</p></li>
+</ul>
 </section>
 </section>
 </section>

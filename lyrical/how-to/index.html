@@ -94,13 +94,22 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/index.html#config-schema">Config schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/index.html#fitting-a-part">Fitting a part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/index.html#ad-hoc-slots">Ad hoc slots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/index.html#errors">Errors</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/index.html#parts-catalog">Parts catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/index.html#topics">Topics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/index.html#packages">Packages</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design/index.html#parts">Parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design/index.html#assembly">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design/index.html#gazebo">Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design/index.html#shared-machinery">Shared machinery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../design/index.html#assets">Assets</a></li>
 </ul>
 </li>
@@ -139,40 +148,77 @@
 <h1>How to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading"></a></h1>
 <section id="change-the-loadout">
 <h2>Change the loadout<a class="headerlink" href="#change-the-loadout" title="Link to this heading"></a></h2>
-<p>Copy <code class="docutils literal notranslate"><span class="pre">x500_description/config/x500.yaml</span></code>, edit it and pass it to the
-launches; nothing rebuilds:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_loadout.yaml
-ros2<span class="w"> </span>launch<span class="w"> </span>x500_description<span class="w"> </span>display.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_loadout.yaml
+<p>The vehicle is described by one YAML config, so changing what is fitted
+never means rebuilding. Start from the default config:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$HOME</span>/my_x500
+cp<span class="w"> </span><span class="s2">"</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>x500_description<span class="k">)</span><span class="s2">"</span>/config/x500.yaml<span class="w"> </span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml
 </pre></div>
 </div>
-<p>A slot entry picks what goes in a slot (<code class="docutils literal notranslate"><span class="pre">{slot:</span> <span class="pre">gimbal,</span> <span class="pre">type:</span> <span class="pre">gimbal_camera}</span></code>,
-<code class="docutils literal notranslate"><span class="pre">{slot:</span> <span class="pre">gps,</span> <span class="pre">type:</span> <span class="pre">none}</span></code>); an entry without <code class="docutils literal notranslate"><span class="pre">slot:</span></code> is a free placement
-(<code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">battery_4s,</span> <span class="pre">name:</span> <span class="pre">battery_aft,</span> <span class="pre">xyz:</span> <span class="pre">&quot;-0.09</span> <span class="pre">0</span> <span class="pre">-0.045&quot;}</span></code>); ad hoc
-slots go under <code class="docutils literal notranslate"><span class="pre">slots:</span></code>. The instance key for a slot of a non base part is
-<code class="docutils literal notranslate"><span class="pre">of:</span></code>, not <code class="docutils literal notranslate"><span class="pre">on:</span></code> (YAML reads a bare <code class="docutils literal notranslate"><span class="pre">on</span></code> as the boolean <code class="docutils literal notranslate"><span class="pre">true</span></code>).</p>
+<p>Edit your copy, then hand it to either launch with <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>config_file:<span class="o">=</span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml
+ros2<span class="w"> </span>launch<span class="w"> </span>x500_description<span class="w"> </span>display.launch.xml<span class="w"> </span>config_file:<span class="o">=</span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml
+</pre></div>
+</div>
+<p>Inside the config there are three ways to place a part:</p>
+<ul>
+<li><p>A <strong>slot entry</strong> fills one of the slots the parts declare. Name the slot
+and the type that goes in it, or <code class="docutils literal notranslate"><span class="pre">none</span></code> to leave it empty:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">gimbal</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">gimbal_camera</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">gps</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">none</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>A <strong>free placement</strong> is an entry with no <code class="docutils literal notranslate"><span class="pre">slot:</span></code>. It bolts a part
+straight onto its parent at a pose you give:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">battery_4s</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">battery_aft</span><span class="p p-Indicator">,</span><span class="nt"> xyz</span><span class="p">:</span><span class="w"> </span><span class="s">"-0.09</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">-0.045"</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>An <strong>ad hoc slot</strong> under <code class="docutils literal notranslate"><span class="pre">slots:</span></code> adds a mount point the parts did not
+declare.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To fill a slot on a part other than the base, the instance key is <code class="docutils literal notranslate"><span class="pre">of:</span></code>,
+never <code class="docutils literal notranslate"><span class="pre">on:</span></code>. YAML reads a bare <code class="docutils literal notranslate"><span class="pre">on</span></code> as the boolean <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</div>
 </section>
 <section id="generate-the-artifacts-yourself">
 <h2>Generate the artifacts yourself<a class="headerlink" href="#generate-the-artifacts-yourself" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>x500_gazebo<span class="w"> </span>configure_vehicle.py<span class="w"> </span>--config<span class="w"> </span>my_loadout.yaml<span class="w"> </span>--out-dir<span class="w"> </span>~/my_x500
+<p>The launches generate everything they need, but you can write the same
+artifacts to a directory of your own:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>x500_gazebo<span class="w"> </span>configure_vehicle.py<span class="w"> </span>--config<span class="w"> </span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml<span class="w"> </span>--out-dir<span class="w"> </span><span class="nv">$HOME</span>/my_x500
 </pre></div>
 </div>
-<p>writes the URDF, <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.config</span></code> and the bridge config; the
-directory works as a <code class="docutils literal notranslate"><span class="pre">model://</span></code> root on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code>. To check a
-config against an assembled URDF:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>holybro_parts<span class="w"> </span>check_assembly.py<span class="w"> </span>my_loadout.yaml<span class="w"> </span>~/my_x500/x500.urdf
+<p>That writes <code class="docutils literal notranslate"><span class="pre">x500.urdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.config</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ros_gz_bridge.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">robot_description.yaml</span></code>. Because the directory
+holds a <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code> next to a <code class="docutils literal notranslate"><span class="pre">model.config</span></code>, it works as a <code class="docutils literal notranslate"><span class="pre">model://</span></code>
+root on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code>.</p>
+<p>To confirm a config and an assembled URDF still agree:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>holybro_parts<span class="w"> </span>check_assembly.py<span class="w"> </span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml<span class="w"> </span><span class="nv">$HOME</span>/my_x500/x500.urdf
 </pre></div>
 </div>
 </section>
 <section id="add-a-part">
 <h2>Add a part<a class="headerlink" href="#add-a-part" title="Link to this heading"></a></h2>
-<p>A part is one hand written URDF xacro macro in <code class="docutils literal notranslate"><span class="pre">holybro_parts/urdf/</span></code>,
-following the contract documented at the top of
-<code class="docutils literal notranslate"><span class="pre">holybro_parts/urdf/parts.xacro</span></code>: a <code class="docutils literal notranslate"><span class="pre">&lt;part&gt;_info</span></code> macro exporting attach,
-slots, frames and (for propellers) a drive table, and the part macro
-emitting the link, its mounting joint and its slot and frame links. Add the
-include to <code class="docutils literal notranslate"><span class="pre">parts.xacro</span></code>, and for a sensor part teach <code class="docutils literal notranslate"><span class="pre">x500_gazebo</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">model.sdf.xacro</span></code> emitter and <code class="docutils literal notranslate"><span class="pre">generate_bridge_config.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code>
-its topics (the GPS mast is the template).</p>
+<p>A part is one hand written URDF xacro macro in <code class="docutils literal notranslate"><span class="pre">holybro_parts/urdf/</span></code>. The
+contract it has to follow is documented at the top of
+<code class="docutils literal notranslate"><span class="pre">holybro_parts/urdf/parts.xacro</span></code>; in short, the file holds two macros:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;part&gt;_info</span></code>, exporting the part’s metadata: where it attaches, its
+slots, its frames and, for propellers, a drive table.</p></li>
+<li><p>the part macro itself, emitting the link, its mounting joint, and its
+slot and frame links.</p></li>
+</ul>
+<p>Then add the include to <code class="docutils literal notranslate"><span class="pre">parts.xacro</span></code>. A sensor part needs two more
+edits, so that its topics reach Gazebo and the bridge:</p>
+<ul class="simple">
+<li><p>the emitter in <code class="docutils literal notranslate"><span class="pre">x500_gazebo</span></code>’s <code class="docutils literal notranslate"><span class="pre">model.sdf.xacro</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code> in <code class="docutils literal notranslate"><span class="pre">generate_bridge_config.py</span></code>.</p></li>
+</ul>
+<p>The GPS mast is the worked example to copy from for both.</p>
 </section>
 </section>
 

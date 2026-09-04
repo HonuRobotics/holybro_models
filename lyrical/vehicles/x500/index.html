@@ -94,13 +94,22 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#config-schema">Config schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#fitting-a-part">Fitting a part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#ad-hoc-slots">Ad hoc slots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/index.html#errors">Errors</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#parts-catalog">Parts catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#topics">Topics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/index.html#packages">Packages</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#parts">Parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assembly">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#gazebo">Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/index.html#shared-machinery">Shared machinery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../design/index.html#assets">Assets</a></li>
 </ul>
 </li>
@@ -150,11 +159,18 @@ kit quadcopter, assembled from the <code class="docutils literal notranslate"><s
 </div>
 <section id="the-default-vehicle">
 <h2>The default vehicle<a class="headerlink" href="#the-default-vehicle" title="Link to this heading"></a></h2>
-<p>The default loadout is the airframe with its four 1345 propellers (PX4
-quad X spin: rotors 0 and 1 counter clockwise, 2 and 3 clockwise), the 4S
-battery and the GPS mast. Everything else in the catalog (companion
-computer, gimbal camera) can be fitted, and the defaults swapped or left
-off (<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>).</p>
+<p>Launch the X500 without a config and you get the airframe with:</p>
+<ul class="simple">
+<li><p><strong>four 1345 propellers</strong>, in the PX4 quad X layout: rotors 0 and 1 spin
+counter clockwise, rotors 2 and 3 clockwise.</p></li>
+<li><p><strong>the 4S battery</strong>.</p></li>
+<li><p><strong>the GPS mast</strong>.</p></li>
+</ul>
+<p>That is enough to fly once an autopilot is attached or you provide
+control code. Two more parts sit in the catalog unfitted, the companion
+computer and the gimbal camera, and nothing above is fixed: fit an
+optional part, swap a default for another accepted type, or leave a
+default off entirely. See <a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>.</p>
 </section>
 </section>
 
