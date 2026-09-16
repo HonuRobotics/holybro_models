@@ -16,15 +16,18 @@
 Generate the ros_gz bridge config from the vehicle parts config.
 
 Run at build time (see CMakeLists.txt) and at launch (configure_vehicle.py):
-emits /clock, /joint_states, the airframe flight sensors (IMU, air
+emits /clock, /<topic_namespace>/joint_states, the airframe flight sensors (IMU, air
 pressure, magnetometer: they belong to the airframe, not to a fitted part)
 and one entry per topic of each part in the assembly that has topics (the
 GPS part's fix). The parts come from the generated URDF's <assembly_part>
 manifest (the resolved loadout, defaults included); topic bases follow
 /<topic_namespace>/<part name>, overridable per part in the vehicle config
 with `topic` (both sides), `gz_topic` (Gazebo side) and `ros_topic` (ROS
-side). The motor command bus (gz.msgs.Actuators) is deliberately NOT
-bridged: that is the autopilot layer's interface. The config is also
+side). An override stays under the namespace, so several instances of
+one config never share a topic; one that starts with a slash is used as
+given. The motor command bus (actuator_msgs/msg/Actuators to
+gz.msgs.Actuators on /<topic_namespace>/command/motor_speed) is bridged
+too: it is the vehicle's actuator interface. The config is also
 checked against the manifest here (holybro_parts.assembly.check), so a
 loadout that names a slot or an instance that does not exist fails the
 build or the launch with the reason.
@@ -59,6 +62,11 @@ def absolute(topic):
     return topic if topic.startswith('/') else '/' + topic
 
 
+def under(ns, base):
+    """Return `base` under namespace `ns`, or as given when it starts with a slash."""
+    return base if base.startswith('/') else f'{ns}/{base}'
+
+
 def overrides_for(cfg, name):
     """
     Return the config entry that fitted instance `name`, or {}.
@@ -89,11 +97,20 @@ def bridge_entries(cfg, instances):
     # Rotor joint states from the JointStatePublisher plugin, for
     # robot_state_publisher / RViz prop animation.
     entries.append({
-        'ros_topic_name': '/joint_states',
+        'ros_topic_name': absolute(f'{ns}/joint_states'),
         'gz_topic_name': absolute(f'{ns}/joint_states'),
         'ros_type_name': 'sensor_msgs/msg/JointState',
         'gz_type_name': 'gz.msgs.Model',
         'direction': 'GZ_TO_ROS',
+    })
+    # The motor command bus: one angular velocity per rotor, indexed by the
+    # rotor number, the topic the MulticopterMotorModel plugins subscribe to.
+    entries.append({
+        'ros_topic_name': absolute(f'{ns}/command/motor_speed'),
+        'gz_topic_name': absolute(f'{ns}/command/motor_speed'),
+        'ros_type_name': 'actuator_msgs/msg/Actuators',
+        'gz_type_name': 'gz.msgs.Actuators',
+        'direction': 'ROS_TO_GZ',
     })
     for topic, ros_type, gz_type in FLIGHT_SENSORS:
         entries.append({
@@ -106,9 +123,8 @@ def bridge_entries(cfg, instances):
         })
     for ptype, name in instances:
         part = overrides_for(cfg, name)
-        default_base = f'{ns}/{name}'
-        gz_base = part.get('gz_topic', part.get('topic', default_base))
-        ros_base = part.get('ros_topic', part.get('topic', default_base))
+        gz_base = under(ns, part.get('gz_topic', part.get('topic', name)))
+        ros_base = under(ns, part.get('ros_topic', part.get('topic', name)))
         for suffix, ros_type, gz_type, direction in PART_TOPICS.get(ptype, []):
             entry = {
                 'ros_topic_name': absolute(f'{ros_base}/{suffix}'),

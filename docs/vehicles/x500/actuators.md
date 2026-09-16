@@ -14,22 +14,45 @@ following the [Add a part](../../how-to/index.md) guide.
 
 ## Actuators ROS API
 
-There is none, deliberately. On a multicopter the per rotor outputs only
-make sense downstream of an attitude controller, so the autopilot (PX4
-SITL, ArduPilot SITL or a custom controller) is the control layer and it
-talks to the Gazebo motor bus directly. The marine vehicles (BlueBoat,
-BlueROV2) expose a normalized -1..1 `throttle` topic per thruster, the
-ArduPilot output convention; the X500's equivalent normalized layer is
-the autopilot itself. Rotor joint states are bridged to `/joint_states`
-so RViz animates the props.
+The four rotors are driven together over one motor command bus:
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/<name>/command/motor_speed` | Angular velocity per rotor (rad/s), one entry per rotor number, indexed from 0 | [actuator_msgs/msg/Actuators](https://github.com/rudislabs/actuator_msgs/blob/main/msg/Actuators.msg) |
+
+`<name>` is the instance name, `x500` for the default instance, which the
+commands below use, or whatever the quad was spawned as.
+
+The `velocity` array carries one angular velocity per rotor, in rad/s,
+where entry `i` drives `rotor_i`. Each motor plugin ramps its rotor to the
+commanded speed with the part's time constants and holds it until the next
+message, so always send all four; a stopped rotor is a `0`. To spin all
+four by hand:
+
+```bash
+ros2 topic pub --once /x500/command/motor_speed actuator_msgs/msg/Actuators "{velocity: [700, 700, 700, 700]}"
+```
+
+and to stop them:
+
+```bash
+ros2 topic pub --once /x500/command/motor_speed actuator_msgs/msg/Actuators "{velocity: [0, 0, 0, 0]}"
+```
+
+The bus is a low level interface: it sets rotor speeds and nothing more,
+and keeping the quad level and steering it is the job of a controller
+above it. Rotor joint
+states are bridged to `/<name>/joint_states` so RViz animates the props.
 
 ## Gazebo transport API
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/x500/command/motor_speed` | Angular velocity per rotor (rad/s), indexed by the rotor number | `gz.msgs.Actuators` |
+| `/<name>/command/motor_speed` | The same bus on the Gazebo side | `gz.msgs.Actuators` |
 
-To spin the rotors by hand, with no autopilot:
+The motor plugins build the topic from the instance name, so a quad spawned
+as `uav_b` listens on `/uav_b/command/motor_speed`. The bridge maps the ROS
+messages above onto it; the same command can be sent from the Gazebo side:
 
 ```bash
 gz topic -t /x500/command/motor_speed -m gz.msgs.Actuators -p 'velocity: [700, 700, 700, 700]'

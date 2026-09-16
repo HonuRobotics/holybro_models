@@ -28,6 +28,7 @@
   <exec_depend>ros_gz_bridge</exec_depend>
   <!-- ROS msg types the bridge maps the flight sensors to -->
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>actuator_msgs</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>launch_xml</exec_depend>

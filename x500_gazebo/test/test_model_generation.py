@@ -129,6 +129,11 @@ def test_sensor_and_bridge_topics_agree():
         root, _ = xacro(MODEL_XACRO, config)
         sdf_topics = {t.text if t.text.startswith('/') else '/' + t.text
                       for t in root.iter('topic')}
+        # The motor bus has no <topic>: every motor plugin subscribes to its
+        # <commandSubTopic> under its <robotNamespace>.
+        for motor in motor_plugins(root):
+            sdf_topics.add('/' + motor.find('robotNamespace').text
+                           + '/' + motor.find('commandSubTopic').text)
         entries = bridge_gen.bridge_entries(yaml.safe_load(config),
                                             urdf_instances(config))
         # /clock has no model-side <topic>; joint_states does (the plugin's),
@@ -164,8 +169,9 @@ def test_sensor_frame_ids_resolve_in_tf():
     yields messages no lookup_transform can resolve. The deprecated
     gz_frame_id spelling also fails this test on purpose.
     """
-    sdf_root, _ = xacro(MODEL_XACRO, default_config())
-    urdf_root, _ = xacro(URDF_XACRO, default_config())
+    config = default_config().replace('topic_namespace: x500', 'topic_namespace: uav_a')
+    sdf_root, _ = xacro(MODEL_XACRO, config)
+    urdf_root, _ = xacro(URDF_XACRO, config)
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     sensors = list(sdf_root.iter('sensor'))
     assert sensors
@@ -173,9 +179,19 @@ def test_sensor_frame_ids_resolve_in_tf():
         frame = sensor.find('frame_id')
         assert frame is not None, (
             f'sensor {sensor.get("name")} sets no <frame_id>')
-        assert frame.text in urdf_links, (
+        prefix, _, link = frame.text.partition('/')
+        assert prefix == 'uav_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
-            f'which robot_state_publisher never puts in TF')
+            f'which robot_state_publisher never puts in TF for instance uav_a')
+
+
+def test_model_name_follows_the_topic_namespace():
+    """The model is named after the instance, so spawning it needs no rename."""
+    root, _ = xacro(MODEL_XACRO, default_config())
+    assert root.find('model').get('name') == 'x500'
+    root, _ = xacro(MODEL_XACRO, default_config().replace(
+        'topic_namespace: x500', 'topic_namespace: uav_a'))
+    assert root.find('model').get('name') == 'uav_a'
 
 
 def test_installed_artifacts_match_shipped_config():

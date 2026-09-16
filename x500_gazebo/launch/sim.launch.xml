@@ -9,7 +9,8 @@
   config that does not match the parts (a slot that does not exist, a type
   that does not fit) fails the launch with the reason. The world is vehicle
   free (x500_ground.sdf by default) and the generated model is spawned into
-  it as "x500". With use_composition (default), gz_server, the bridge and
+  it under its instance name ("x500" unless name:= says otherwise), at the
+  pose x y z roll pitch yaw. With use_composition (default), gz_server, the bridge and
   robot_state_publisher run as composable nodes in ONE container process;
   the Gazebo GUI runs as a separate process. No control layer: the quad
   rests on its landing gear until something publishes motor commands.
@@ -28,12 +29,18 @@
        default="$(find-pkg-share x500_description)/config/x500.yaml"
        description="Vehicle loadout config, expanded at launch."/>
   <arg name="name" default="x500"
-       description="Model name to spawn as."/>
+       description="Instance name: the Gazebo model name, the topic namespace (/&lt;name&gt;/...) and the TF prefix; letters, digits and underscores. Give each copy of the vehicle in one world its own."/>
+  <arg name="x" default="0" description="Spawn position x (m)."/>
+  <arg name="y" default="0" description="Spawn position y (m)."/>
   <arg name="z" default="0.25" description="Spawn height (m); drops onto the landing gear."/>
+  <arg name="roll" default="0" description="Spawn roll (rad)."/>
+  <arg name="pitch" default="0" description="Spawn pitch (rad)."/>
+  <arg name="yaw" default="0" description="Spawn heading (rad)."/>
 
-  <!-- Every artifact of this loadout, generated now from config_file. -->
+  <!-- Every artifact of this instance, generated now from config_file and
+       name. -->
   <let name="vehicle_dir"
-       value="$(command '$(find-pkg-prefix x500_gazebo)/lib/x500_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
+       value="$(command '$(find-pkg-prefix x500_gazebo)/lib/x500_gazebo/configure_vehicle.py --config $(var config_file) --name $(var name) --cache')"/>
 
   <!-- Gazebo server (composable) creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
@@ -45,8 +52,10 @@
   <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
 
   <!-- The vehicle, spawned from the generated model into the (only) world. -->
-  <node pkg="ros_gz_sim" exec="create" name="spawn_x500" output="screen"
-        args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
+  <node pkg="ros_gz_sim" exec="create" name="spawn_$(var name)" output="screen"
+        args="-name $(var name) -file $(var vehicle_dir)/model.sdf
+              -x $(var x) -y $(var y) -z $(var z)
+              -R $(var roll) -P $(var pitch) -Y $(var yaw)"/>
 
   <!-- ros_gz bridge (composable) joins the container. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
@@ -55,13 +64,18 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
-  <!-- robot_state_publisher: composable node in the container when composing... -->
+  <!-- robot_state_publisher, reading the instance's joint states and
+       prefixing every TF frame with the instance name, so its frames match
+       the frame ids the sensors publish: a composable node in the container
+       when composing... -->
   <load_composable_node target="ros_gz_container" if="$(var use_composition)">
     <composable_node pkg="robot_state_publisher"
                      plugin="robot_state_publisher::RobotStatePublisher"
                      name="robot_state_publisher">
       <param from="$(var vehicle_dir)/robot_description.yaml"/>
+      <param name="frame_prefix" value="$(var name)/" type="str"/>
       <param name="use_sim_time" value="true" type="bool"/>
+      <remap from="joint_states" to="/$(var name)/joint_states"/>
     </composable_node>
   </load_composable_node>
 
@@ -69,6 +83,8 @@
   <node pkg="robot_state_publisher" exec="robot_state_publisher"
         name="robot_state_publisher" unless="$(var use_composition)">
     <param from="$(var vehicle_dir)/robot_description.yaml"/>
+    <param name="frame_prefix" value="$(var name)/"/>
     <param name="use_sim_time" value="true"/>
+    <remap from="joint_states" to="/$(var name)/joint_states"/>
   </node>
 </launch>

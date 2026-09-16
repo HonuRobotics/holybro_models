@@ -21,8 +21,7 @@ Launch the X500 without a config and you get the airframe with:
 - **the 4S battery**.
 - **the GPS mast**.
 
-That is enough to fly once an autopilot is attached or you provide
-control code. Two more parts sit in the catalog unfitted, the companion
+That is enough to fly once a controller drives the motor bus. Two more parts sit in the catalog unfitted, the companion
 computer and the gimbal camera, and nothing above is fixed: fit an
 optional part, swap a default for another accepted type, or leave a
 default off entirely. See [Configuration](configuration.md).

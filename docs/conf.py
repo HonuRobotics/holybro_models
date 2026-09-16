@@ -18,3 +18,7 @@ author = 'Honu Robotics'
 
 extensions = ['sphinx_honu']
 honu_github = ('HonuRobotics', 'holybro_models')
+
+# Anchors for headings down to ###, so a page can link to a section
+# (`page.md#section-title`) in a way GitHub renders too.
+myst_heading_anchors = 3
