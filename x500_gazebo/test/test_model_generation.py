@@ -129,6 +129,11 @@ def test_sensor_and_bridge_topics_agree():
         root, _ = xacro(MODEL_XACRO, config)
         sdf_topics = {t.text if t.text.startswith('/') else '/' + t.text
                       for t in root.iter('topic')}
+        # The motor bus has no <topic>: every motor plugin subscribes to its
+        # <commandSubTopic> under its <robotNamespace>.
+        for motor in motor_plugins(root):
+            sdf_topics.add('/' + motor.find('robotNamespace').text
+                           + '/' + motor.find('commandSubTopic').text)
         entries = bridge_gen.bridge_entries(yaml.safe_load(config),
                                             urdf_instances(config))
         # /clock has no model-side <topic>; joint_states does (the plugin's),

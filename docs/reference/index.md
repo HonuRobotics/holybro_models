@@ -66,8 +66,9 @@ half assembled vehicle.
 ## Topics
 
 See the X500 [Sensors](../vehicles/x500/sensors.md) and
-[Actuators](../vehicles/x500/actuators.md) pages. `/clock` and
-`/<namespace>/joint_states` are always bridged; every part topic follows
+[Actuators](../vehicles/x500/actuators.md) pages. `/clock`,
+`/<namespace>/joint_states` and `/<namespace>/command/motor_speed` are
+always bridged; every part topic follows
 `/<namespace>/<instance>/<suffix>` on both sides, and a per part override
 goes under the namespace unless it starts with a slash.
 

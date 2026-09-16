@@ -17,7 +17,7 @@ Gazebo opens with the X500 resting on its landing gear:
 - the GPS mast
 
 That is the default configuration; no configuration was involved. The
-model carries no control layer, so the rotors idle until an autopilot
+model carries no control layer, so the rotors idle until something
 publishes on the motor bus
 ([Actuators](../vehicles/x500/actuators.md)).
 

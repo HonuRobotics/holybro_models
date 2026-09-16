@@ -8,8 +8,8 @@ Launches the vehicle in its default configuration: every artifact of the
 loadout is generated at start (URDF, composed model, bridge config, into
 a directory under `$ROS_HOME`), the model is spawned as `x500` into the
 ground world and the ROS bridge comes up with it. The vehicle rests on
-its landing gear; the rotors idle until an autopilot publishes on the
-motor bus ([Actuators](actuators.md)).
+its landing gear; the rotors idle until something publishes on the motor
+bus ([Actuators](actuators.md)).
 
 ![](../../img/x500.png)
 

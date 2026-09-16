@@ -86,8 +86,7 @@ Per part `topic`, `gz_topic` and `ros_topic` overrides go under the
 instance name too, so two instances of one config never share a topic; an
 override that starts with a slash is used as given and is then shared.
 `extra_bridge_topics` are appended to the bridge config verbatim, so they
-are shared by every instance too; the motor bus follows the name on its
-own (`/<name>/command/motor_speed`), so it needs no entry there.
+are shared by every instance too.
 
 `sim.launch.xml` starts a Gazebo server of its own, so running it twice
 gives two simulations, not two quads. Several instances share one world

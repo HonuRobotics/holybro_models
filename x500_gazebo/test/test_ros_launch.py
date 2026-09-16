@@ -86,6 +86,12 @@ def test_tf_frames_carry_the_instance_name(sim):
     assert code == 0 and 'x500/gps_antenna' in out, f'no prefixed frames\n{err}'
 
 
+def test_motor_bus_is_a_ros_topic(sim):
+    """The motor command bus is bridged to ROS as actuator messages."""
+    code, out, err = ros(sim, 'topic', 'info', '/x500/command/motor_speed', timeout=30)
+    assert code == 0 and 'actuator_msgs/msg/Actuators' in out, f'motor bus not bridged\n{err}'
+
+
 def test_imu_flows_to_ros(sim):
     """IMU data crosses the bridge (non-render sensor: hard assertion)."""
     def imu_seen():

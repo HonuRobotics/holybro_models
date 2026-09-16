@@ -25,8 +25,9 @@ manifest (the resolved loadout, defaults included); topic bases follow
 with `topic` (both sides), `gz_topic` (Gazebo side) and `ros_topic` (ROS
 side). An override stays under the namespace, so several instances of
 one config never share a topic; one that starts with a slash is used as
-given. The motor command bus (gz.msgs.Actuators) is deliberately NOT
-bridged: that is the autopilot layer's interface. The config is also
+given. The motor command bus (actuator_msgs/msg/Actuators to
+gz.msgs.Actuators on /<topic_namespace>/command/motor_speed) is bridged
+too: it is the vehicle's actuator interface. The config is also
 checked against the manifest here (holybro_parts.assembly.check), so a
 loadout that names a slot or an instance that does not exist fails the
 build or the launch with the reason.
@@ -101,6 +102,15 @@ def bridge_entries(cfg, instances):
         'ros_type_name': 'sensor_msgs/msg/JointState',
         'gz_type_name': 'gz.msgs.Model',
         'direction': 'GZ_TO_ROS',
+    })
+    # The motor command bus: one angular velocity per rotor, indexed by the
+    # rotor number, the topic the MulticopterMotorModel plugins subscribe to.
+    entries.append({
+        'ros_topic_name': absolute(f'{ns}/command/motor_speed'),
+        'gz_topic_name': absolute(f'{ns}/command/motor_speed'),
+        'ros_type_name': 'actuator_msgs/msg/Actuators',
+        'gz_type_name': 'gz.msgs.Actuators',
+        'direction': 'ROS_TO_GZ',
     })
     for topic, ros_type, gz_type in FLIGHT_SENSORS:
         entries.append({

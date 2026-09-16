@@ -28,7 +28,8 @@ _spec.loader.exec_module(bridge_gen)
 
 # Airframe topics, always present (the flight sensors belong to the
 # airframe, not to a fitted part).
-ALWAYS = {'/clock', '/x500/joint_states', '/x500/imu', '/x500/air_pressure', '/x500/mag'}
+ALWAYS = {'/clock', '/x500/joint_states', '/x500/command/motor_speed',
+          '/x500/imu', '/x500/air_pressure', '/x500/mag'}
 
 
 def entries_for(cfg, instances):
@@ -46,6 +47,10 @@ def test_airframe_sensors_always_bridged():
     assert imu['gz_type_name'] == 'gz.msgs.IMU'
     assert 'lazy' not in entries['/clock']
     assert imu['lazy'] is True
+    bus = entries['/x500/command/motor_speed']
+    assert bus['ros_type_name'] == 'actuator_msgs/msg/Actuators'
+    assert bus['gz_type_name'] == 'gz.msgs.Actuators'
+    assert bus['direction'] == 'ROS_TO_GZ' and 'lazy' not in bus
 
 
 def test_gps_part_bridges_its_fix():
@@ -85,13 +90,13 @@ def test_topic_and_namespace_overrides():
 
 
 def test_extra_bridge_topics_verbatim():
-    """Extra_bridge_topics entries are appended untouched (e.g. the motor bus)."""
-    extra = {'ros_topic_name': '/x500/motors',
-             'gz_topic_name': '/x500/command/motor_speed',
-             'ros_type_name': 'actuator_msgs/msg/Actuators',
-             'gz_type_name': 'gz.msgs.Actuators', 'direction': 'ROS_TO_GZ'}
+    """Extra_bridge_topics entries are appended untouched."""
+    extra = {'ros_topic_name': '/odom',
+             'gz_topic_name': '/model/x500/odometry',
+             'ros_type_name': 'nav_msgs/msg/Odometry',
+             'gz_type_name': 'gz.msgs.Odometry', 'direction': 'GZ_TO_ROS'}
     cfg = {'extra_bridge_topics': [dict(extra)]}
-    assert entries_for(cfg, [])['/x500/motors'] == extra
+    assert entries_for(cfg, [])['/odom'] == extra
 
 
 def test_cli_rejects_a_config_that_matches_nothing(tmp_path):
