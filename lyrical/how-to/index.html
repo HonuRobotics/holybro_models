@@ -90,6 +90,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#change-the-loadout">Change the loadout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#several-vehicles">Several vehicles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-a-part">Add a part</a></li>
 </ul>
 </li>
@@ -193,9 +194,54 @@ artifacts to a directory of your own:</p>
 </pre></div>
 </div>
 <p>That writes <code class="docutils literal notranslate"><span class="pre">x500.urdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.config</span></code>,
-<code class="docutils literal notranslate"><span class="pre">ros_gz_bridge.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">robot_description.yaml</span></code>. Because the directory
-holds a <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code> next to a <code class="docutils literal notranslate"><span class="pre">model.config</span></code>, it works as a <code class="docutils literal notranslate"><span class="pre">model://</span></code>
-root on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">ros_gz_bridge.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">robot_description.yaml</span></code>, plus <code class="docutils literal notranslate"><span class="pre">vehicle.yaml</span></code>,
+the config as used. Because the directory holds a <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code> next to a
+<code class="docutils literal notranslate"><span class="pre">model.config</span></code>, it works as a <code class="docutils literal notranslate"><span class="pre">model://</span></code> root on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code>.
+Add <code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">&lt;name&gt;</span></code> to generate an instance under another name.</p>
+</section>
+<section id="several-vehicles">
+<h2>Several vehicles<a class="headerlink" href="#several-vehicles" title="Link to this heading"></a></h2>
+<p>Every instance of the vehicle goes by one name, which is at once its
+Gazebo model name, its topic namespace (<code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/...</span></code> on both the Gazebo
+and the ROS side, joint states included) and its TF prefix (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/</span></code>
+in front of every frame and every sensor <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>). A name is letters,
+digits and underscores, starting with a letter; the generator refuses
+anything else.</p>
+<p>The launch argument is the name. <code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> always passes <code class="docutils literal notranslate"><span class="pre">name:=</span></code>,
+<code class="docutils literal notranslate"><span class="pre">x500</span></code> by default, to <code class="docutils literal notranslate"><span class="pre">configure_vehicle.py</span> <span class="pre">--name</span></code>, which applies it to the
+config before generating the artifacts, so the model name, the plugin
+topics, the frames and the bridge cannot disagree. A <code class="docutils literal notranslate"><span class="pre">topic_namespace</span></code> in a
+custom config is therefore overridden by the launch; it only names the
+instance when the generator runs without <code class="docutils literal notranslate"><span class="pre">--name</span></code>. <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, <code class="docutils literal notranslate"><span class="pre">roll</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pitch</span></code> and <code class="docutils literal notranslate"><span class="pre">yaw</span></code> place the instance:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>x500_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>name:<span class="o">=</span>uav_b<span class="w"> </span>x:<span class="o">=</span><span class="m">2</span><span class="w"> </span>yaw:<span class="o">=</span><span class="m">1</span>.57
+</pre></div>
+</div>
+<p>Per part <code class="docutils literal notranslate"><span class="pre">topic</span></code>, <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> and <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> overrides go under the
+instance name too, so two instances of one config never share a topic; an
+override that starts with a slash is used as given and is then shared.
+<code class="docutils literal notranslate"><span class="pre">extra_bridge_topics</span></code> are appended to the bridge config verbatim, so they
+are shared by every instance too.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> starts a Gazebo server of its own, so running it twice
+gives two simulations, not two quads. Several instances share one world
+through gz-maritime, whose simulation launch names no vehicle and whose
+spawn launch adds any vehicle by name and pose, running this generator for
+it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>kai_bringup<span class="w"> </span>simulation.launch.xml<span class="w"> </span>world:<span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>x500_gazebo<span class="k">)</span>/worlds/x500_ground.sdf
+</pre></div>
+</div>
+<p>then, one command per quad:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">x500</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>x500_gazebo<span class="k">)</span><span class="s2">/lib/x500_gazebo/configure_vehicle.py --config </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>x500_description<span class="k">)</span><span class="s2">/config/x500.yaml"</span>
+ros2<span class="w"> </span>launch<span class="w"> </span>kai_bringup<span class="w"> </span>spawn_vehicle.launch.xml<span class="w"> </span>name:<span class="o">=</span>uav_a<span class="w"> </span>y:<span class="o">=</span><span class="m">2</span><span class="w"> </span>z:<span class="o">=</span><span class="m">0</span>.25<span class="w"> </span>generator:<span class="o">=</span><span class="s2">"</span><span class="nv">$x500</span><span class="s2">"</span>
+ros2<span class="w"> </span>launch<span class="w"> </span>kai_bringup<span class="w"> </span>spawn_vehicle.launch.xml<span class="w"> </span>name:<span class="o">=</span>uav_b<span class="w"> </span>y:<span class="o">=</span>-2<span class="w"> </span>z:<span class="o">=</span><span class="m">0</span>.25<span class="w"> </span>generator:<span class="o">=</span><span class="s2">"</span><span class="nv">$x500</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>Each quad gets its topics under its name, its own bridge and
+<code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> in its namespace and its own TF prefix; the clock
+is bridged once by the simulation launch, which drops the <code class="docutils literal notranslate"><span class="pre">/clock</span></code> entry
+this bridge config carries. To run several <strong>simulations</strong> side by side
+instead, give each Gazebo instance its own <code class="docutils literal notranslate"><span class="pre">GZ_PARTITION</span></code> and each ROS
+graph its own <code class="docutils literal notranslate"><span class="pre">ROS_DOMAIN_ID</span></code>.</p>
 <p>To confirm a config and an assembled URDF still agree:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>holybro_parts<span class="w"> </span>check_assembly.py<span class="w"> </span><span class="nv">$HOME</span>/my_x500/my_loadout.yaml<span class="w"> </span><span class="nv">$HOME</span>/my_x500/x500.urdf
 </pre></div>

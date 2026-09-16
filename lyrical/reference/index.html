@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#change-the-loadout">Change the loadout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#several-vehicles">Several vehicles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/index.html#add-a-part">Add a part</a></li>
 </ul>
 </li>
@@ -289,9 +290,11 @@ half assembled vehicle.</p>
 <section id="topics">
 <h2>Topics<a class="headerlink" href="#topics" title="Link to this heading"></a></h2>
 <p>See the X500 <a class="reference internal" href="../vehicles/x500/sensors.html"><span class="std std-doc">Sensors</span></a> and
-<a class="reference internal" href="../vehicles/x500/actuators.html"><span class="std std-doc">Actuators</span></a> pages. <code class="docutils literal notranslate"><span class="pre">/clock</span></code> and
-<code class="docutils literal notranslate"><span class="pre">/joint_states</span></code> are always bridged; every part topic follows
-<code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/&lt;suffix&gt;</span></code> on both sides.</p>
+<a class="reference internal" href="../vehicles/x500/actuators.html"><span class="std std-doc">Actuators</span></a> pages. <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the
+instance name. <code class="docutils literal notranslate"><span class="pre">/clock</span></code>, <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/joint_states</span></code> and
+<code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/command/motor_speed</span></code> are always bridged; every part topic follows
+<code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/&lt;part&gt;/&lt;suffix&gt;</span></code> on both sides, and a per part override goes
+under the name unless it starts with a slash.</p>
 </section>
 <section id="packages">
 <h2>Packages<a class="headerlink" href="#packages" title="Link to this heading"></a></h2>

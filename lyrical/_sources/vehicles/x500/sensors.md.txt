@@ -20,22 +20,23 @@ guide.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/x500/imu` | Body IMU | [sensor_msgs/msg/Imu](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Imu.html) |
-| `/x500/air_pressure` | Barometer | [sensor_msgs/msg/FluidPressure](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/FluidPressure.html) |
-| `/x500/mag` | Magnetometer | [sensor_msgs/msg/MagneticField](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/MagneticField.html) |
+| `/<name>/imu` | Body IMU | [sensor_msgs/msg/Imu](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Imu.html) |
+| `/<name>/air_pressure` | Barometer | [sensor_msgs/msg/FluidPressure](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/FluidPressure.html) |
+| `/<name>/mag` | Magnetometer | [sensor_msgs/msg/MagneticField](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/MagneticField.html) |
 
 ### GPS
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/x500/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
+| `/<name>/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
 
-These topic names are not fixed strings. Every part topic is built as
-`/<namespace>/<instance>/<suffix>`, so the fix above is the `gps`
-instance publishing `fix` under the `x500` namespace. Change the vehicle
-and the topics change with it:
+`<name>` is the instance name, `x500` for the default instance, or
+whatever the quad was spawned as ([Several vehicles](../../how-to/index.md#several-vehicles)).
+A part topic follows the part's own name (`gps` above), so a part renamed
+or removed in the config moves or drops its topics
+([Configuration](configuration.md)).
 
-- Empty the GPS slot and `/x500/gps/fix` goes away with the part.
-- Rename the instance and the topic follows the new name.
-- Set `topic`, `gz_topic` or `ros_topic` on the part in the config to
-  rename the base yourself.
+Sensor messages carry the sensor's frame under the instance name
+(`<name>/base_link` for the flight sensors, `<name>/gps_antenna` for the
+GPS), which is the frame `robot_state_publisher` publishes for the
+instance.

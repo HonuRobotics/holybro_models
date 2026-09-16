@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#change-the-loadout">Change the loadout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#several-vehicles">Several vehicles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#add-a-part">Add a part</a></li>
 </ul>
 </li>
@@ -178,14 +179,39 @@ following the <a class="reference internal" href="../../how-to/index.html"><span
 </section>
 <section id="actuators-ros-api">
 <h2>Actuators ROS API<a class="headerlink" href="#actuators-ros-api" title="Link to this heading"></a></h2>
-<p>There is none, deliberately. On a multicopter the per rotor outputs only
-make sense downstream of an attitude controller, so the autopilot (PX4
-SITL, ArduPilot SITL or a custom controller) is the control layer and it
-talks to the Gazebo motor bus directly. The marine vehicles (BlueBoat,
-BlueROV2) expose a normalized -1..1 <code class="docutils literal notranslate"><span class="pre">throttle</span></code> topic per thruster, the
-ArduPilot output convention; the X500’s equivalent normalized layer is
-the autopilot itself. Rotor joint states are bridged to <code class="docutils literal notranslate"><span class="pre">/joint_states</span></code>
-so RViz animates the props.</p>
+<p>The four rotors are driven together over one motor command bus:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ROS Topic</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Message type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/command/motor_speed</span></code></p></td>
+<td><p>Angular velocity per rotor (rad/s), one entry per rotor number, indexed from 0</p></td>
+<td><p><a class="reference external" href="https://github.com/rudislabs/actuator_msgs/blob/main/msg/Actuators.msg">actuator_msgs/msg/Actuators</a></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the instance name, <code class="docutils literal notranslate"><span class="pre">x500</span></code> for the default instance, which the
+commands below use, or whatever the quad was spawned as.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">velocity</span></code> array carries one angular velocity per rotor, in rad/s,
+where entry <code class="docutils literal notranslate"><span class="pre">i</span></code> drives <code class="docutils literal notranslate"><span class="pre">rotor_i</span></code>. Each motor plugin ramps its rotor to the
+commanded speed with the part’s time constants and holds it until the next
+message, so always send all four; a stopped rotor is a <code class="docutils literal notranslate"><span class="pre">0</span></code>. To spin all
+four by hand:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>--once<span class="w"> </span>/x500/command/motor_speed<span class="w"> </span>actuator_msgs/msg/Actuators<span class="w"> </span><span class="s2">"{velocity: [700, 700, 700, 700]}"</span>
+</pre></div>
+</div>
+<p>and to stop them:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>--once<span class="w"> </span>/x500/command/motor_speed<span class="w"> </span>actuator_msgs/msg/Actuators<span class="w"> </span><span class="s2">"{velocity: [0, 0, 0, 0]}"</span>
+</pre></div>
+</div>
+<p>The bus is a low level interface: it sets rotor speeds and nothing more,
+and keeping the quad level and steering it is the job of a controller
+above it. Rotor joint
+states are bridged to <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/joint_states</span></code> so RViz animates the props.</p>
 </section>
 <section id="gazebo-transport-api">
 <h2>Gazebo transport API<a class="headerlink" href="#gazebo-transport-api" title="Link to this heading"></a></h2>
@@ -197,13 +223,15 @@ so RViz animates the props.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/x500/command/motor_speed</span></code></p></td>
-<td><p>Angular velocity per rotor (rad/s), indexed by the rotor number</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/command/motor_speed</span></code></p></td>
+<td><p>The same bus on the Gazebo side</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Actuators</span></code></p></td>
 </tr>
 </tbody>
 </table>
-<p>To spin the rotors by hand, with no autopilot:</p>
+<p>The motor plugins build the topic from the instance name, so a quad spawned
+as <code class="docutils literal notranslate"><span class="pre">uav_b</span></code> listens on <code class="docutils literal notranslate"><span class="pre">/uav_b/command/motor_speed</span></code>. The bridge maps the ROS
+messages above onto it; the same command can be sent from the Gazebo side:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/x500/command/motor_speed<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Actuators<span class="w"> </span>-p<span class="w"> </span><span class="s1">'velocity: [700, 700, 700, 700]'</span>
 </pre></div>
 </div>

@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#change-the-loadout">Change the loadout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#several-vehicles">Several vehicles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/index.html#add-a-part">Add a part</a></li>
 </ul>
 </li>
@@ -190,15 +191,15 @@ guide.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/x500/imu</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/imu</span></code></p></td>
 <td><p>Body IMU</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Imu.html">sensor_msgs/msg/Imu</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/x500/air_pressure</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/air_pressure</span></code></p></td>
 <td><p>Barometer</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/FluidPressure.html">sensor_msgs/msg/FluidPressure</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/x500/mag</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/mag</span></code></p></td>
 <td><p>Magnetometer</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/MagneticField.html">sensor_msgs/msg/MagneticField</a></p></td>
 </tr>
@@ -215,22 +216,21 @@ guide.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/x500/gps/fix</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/gps/fix</span></code></p></td>
 <td><p>Position fix</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html">sensor_msgs/msg/NavSatFix</a></p></td>
 </tr>
 </tbody>
 </table>
-<p>These topic names are not fixed strings. Every part topic is built as
-<code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/&lt;suffix&gt;</span></code>, so the fix above is the <code class="docutils literal notranslate"><span class="pre">gps</span></code>
-instance publishing <code class="docutils literal notranslate"><span class="pre">fix</span></code> under the <code class="docutils literal notranslate"><span class="pre">x500</span></code> namespace. Change the vehicle
-and the topics change with it:</p>
-<ul class="simple">
-<li><p>Empty the GPS slot and <code class="docutils literal notranslate"><span class="pre">/x500/gps/fix</span></code> goes away with the part.</p></li>
-<li><p>Rename the instance and the topic follows the new name.</p></li>
-<li><p>Set <code class="docutils literal notranslate"><span class="pre">topic</span></code>, <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> or <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> on the part in the config to
-rename the base yourself.</p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the instance name, <code class="docutils literal notranslate"><span class="pre">x500</span></code> for the default instance, or
+whatever the quad was spawned as (<a class="reference internal" href="../../how-to/index.html#several-vehicles"><span class="std std-ref">Several vehicles</span></a>).
+A part topic follows the part’s own name (<code class="docutils literal notranslate"><span class="pre">gps</span></code> above), so a part renamed
+or removed in the config moves or drops its topics
+(<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>).</p>
+<p>Sensor messages carry the sensor’s frame under the instance name
+(<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/base_link</span></code> for the flight sensors, <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/gps_antenna</span></code> for the
+GPS), which is the frame <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> publishes for the
+instance.</p>
 </section>
 </section>
 </section>
