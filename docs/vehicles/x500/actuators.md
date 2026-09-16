@@ -27,11 +27,12 @@ the autopilot itself. Rotor joint states are bridged to
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/x500/command/motor_speed` | Angular velocity per rotor (rad/s), indexed by the rotor number | `gz.msgs.Actuators` |
+| `/<name>/command/motor_speed` | Angular velocity per rotor (rad/s), indexed by the rotor number | `gz.msgs.Actuators` |
 
-The bus is not a fixed string: it is `/<name>/command/motor_speed`, built
-by the motor plugins from the instance name, so a quad spawned as `uav_b`
-listens on `/uav_b/command/motor_speed`.
+`<name>` is the instance name, `x500` for the default instance, which the
+command below uses, or whatever the quad was spawned as: the motor plugins
+build the bus from it, so a quad spawned as `uav_b` listens on
+`/uav_b/command/motor_speed`.
 
 To spin the rotors by hand, with no autopilot:
 

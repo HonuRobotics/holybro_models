@@ -20,15 +20,15 @@ guide.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/x500/imu` | Body IMU | [sensor_msgs/msg/Imu](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Imu.html) |
-| `/x500/air_pressure` | Barometer | [sensor_msgs/msg/FluidPressure](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/FluidPressure.html) |
-| `/x500/mag` | Magnetometer | [sensor_msgs/msg/MagneticField](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/MagneticField.html) |
+| `/<name>/imu` | Body IMU | [sensor_msgs/msg/Imu](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Imu.html) |
+| `/<name>/air_pressure` | Barometer | [sensor_msgs/msg/FluidPressure](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/FluidPressure.html) |
+| `/<name>/mag` | Magnetometer | [sensor_msgs/msg/MagneticField](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/MagneticField.html) |
 
 ### GPS
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/x500/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
+| `/<name>/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
 
 These topic names are not fixed strings. Every part topic is built as
 `/<namespace>/<instance>/<suffix>`, so the fix above is the `gps`
