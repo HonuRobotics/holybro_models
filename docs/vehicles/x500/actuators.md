@@ -20,8 +20,8 @@ SITL, ArduPilot SITL or a custom controller) is the control layer and it
 talks to the Gazebo motor bus directly. The marine vehicles (BlueBoat,
 BlueROV2) expose a normalized -1..1 `throttle` topic per thruster, the
 ArduPilot output convention; the X500's equivalent normalized layer is
-the autopilot itself. Rotor joint states are bridged to `/joint_states`
-so RViz animates the props.
+the autopilot itself. Rotor joint states are bridged to
+`/<name>/joint_states` so RViz animates the props.
 
 ## Gazebo transport API
 

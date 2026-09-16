@@ -28,7 +28,7 @@ _spec.loader.exec_module(bridge_gen)
 
 # Airframe topics, always present (the flight sensors belong to the
 # airframe, not to a fitted part).
-ALWAYS = {'/clock', '/joint_states', '/x500/imu', '/x500/air_pressure', '/x500/mag'}
+ALWAYS = {'/clock', '/x500/joint_states', '/x500/imu', '/x500/air_pressure', '/x500/mag'}
 
 
 def entries_for(cfg, instances):
@@ -66,14 +66,22 @@ def test_geometry_only_parts_produce_nothing():
 
 
 def test_topic_and_namespace_overrides():
-    """Gz_topic/ros_topic > topic > /<namespace>/<name>, matched by instance."""
+    """
+    Gz_topic/ros_topic > topic > <name>, matched by instance, under the namespace.
+
+    An override stays under /<namespace>/ so instances of one config never
+    share a topic; one starting with a slash is used as given.
+    """
     cfg = {'topic_namespace': 'uav_a', 'parts': [
         {'slot': 'gps', 'type': 'gps_mast',
-         'gz_topic': 'uav_a/gps_raw', 'ros_topic': '/sensors/gps'}]}
+         'gz_topic': 'gps_raw', 'ros_topic': '/sensors/gps'}]}
     entries = entries_for(cfg, [('gps_mast', 'gps')])
     fix = entries['/sensors/gps/fix']
     assert fix['gz_topic_name'] == '/uav_a/gps_raw/fix'
     assert '/uav_a/imu' in entries and '/x500/imu' not in entries
+    assert '/uav_a/joint_states' in entries
+    cfg = {'parts': [{'slot': 'gps', 'type': 'gps_mast', 'topic': 'rtk'}]}
+    assert '/x500/rtk/fix' in entries_for(cfg, [('gps_mast', 'gps')])
 
 
 def test_extra_bridge_topics_verbatim():
