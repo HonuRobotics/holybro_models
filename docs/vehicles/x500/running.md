@@ -48,8 +48,8 @@ To see the model in RViz, without Gazebo:
 ros2 launch x500_description display.launch.xml
 ```
 
-In a simulation the frames carry the instance name (`x500/base_link`) and
-joint states arrive as `/x500/joint_states`, so RViz next to
+In a simulation the frames carry the instance name (`<name>/base_link`)
+and joint states arrive as `/<name>/joint_states`, so RViz next to
 `sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
 joint states pointed at the instance.
 

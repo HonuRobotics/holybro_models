@@ -30,17 +30,13 @@ guide.
 |---|---|---|
 | `/<name>/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
 
-These topic names are not fixed strings. Every part topic is built as
-`/<namespace>/<instance>/<suffix>`, so the fix above is the `gps`
-instance publishing `fix` under the `x500` namespace. Change the vehicle
-and the topics change with it:
-
-- Empty the GPS slot and `/x500/gps/fix` goes away with the part.
-- Rename the instance and the topic follows the new name.
-- Set `topic`, `gz_topic` or `ros_topic` on the part in the config to
-  rename the base yourself. The base goes under the namespace unless it
-  starts with a slash, which is then used as given.
+`<name>` is the instance name, `x500` for the default instance, or
+whatever the quad was spawned as ({ref}`Several vehicles <several-vehicles>`).
+A part topic follows the part's own name (`gps` above), so a part renamed
+or removed in the config moves or drops its topics
+([Configuration](configuration.md)).
 
 Sensor messages carry the sensor's frame under the instance name
-(`x500/base_link` for the flight sensors, `x500/gps_antenna` for the GPS),
-which is the frame `robot_state_publisher` publishes for the instance.
+(`<name>/base_link` for the flight sensors, `<name>/gps_antenna` for the
+GPS), which is the frame `robot_state_publisher` publishes for the
+instance.
