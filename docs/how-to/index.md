@@ -66,14 +66,17 @@ Add `--name <name>` to generate an instance under another name.
 Every instance of the vehicle goes by one name, which is at once its
 Gazebo model name, its topic namespace (`/<name>/...` on both the Gazebo
 and the ROS side, joint states included) and its TF prefix (`<name>/`
-in front of every frame and every sensor `frame_id`). By default the name
-is the config's `topic_namespace`, `x500`. A name is letters, digits and
-underscores, starting with a letter; the generator refuses anything else.
+in front of every frame and every sensor `frame_id`). A name is letters,
+digits and underscores, starting with a letter; the generator refuses
+anything else.
 
-`name:=` on the sim launch is passed to `configure_vehicle.py --name`,
-which applies it to the config before generating the artifacts, so the
-model name, the plugin topics, the frames and the bridge cannot disagree.
-`x`, `y`, `z`, `roll`, `pitch` and `yaw` place the instance:
+The launch argument is the name. `sim.launch.xml` always passes `name:=`,
+`x500` by default, to `configure_vehicle.py --name`, which applies it to the
+config before generating the artifacts, so the model name, the plugin
+topics, the frames and the bridge cannot disagree. A `topic_namespace` in a
+custom config is therefore overridden by the launch; it only names the
+instance when the generator runs without `--name`. `x`, `y`, `z`, `roll`,
+`pitch` and `yaw` place the instance:
 
 ```bash
 ros2 launch x500_gazebo sim.launch.xml name:=uav_b x:=2 yaw:=1.57
@@ -82,6 +85,9 @@ ros2 launch x500_gazebo sim.launch.xml name:=uav_b x:=2 yaw:=1.57
 Per part `topic`, `gz_topic` and `ros_topic` overrides go under the
 instance name too, so two instances of one config never share a topic; an
 override that starts with a slash is used as given and is then shared.
+`extra_bridge_topics` are appended to the bridge config verbatim, so they
+are shared by every instance too; the motor bus follows the name on its
+own (`/<name>/command/motor_speed`), so it needs no entry there.
 
 `sim.launch.xml` starts a Gazebo server of its own, so running it twice
 gives two simulations, not two quads. Several instances share one world
