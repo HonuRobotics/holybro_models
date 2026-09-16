@@ -59,8 +59,6 @@ the config as used. Because the directory holds a `model.sdf` next to a
 `model.config`, it works as a `model://` root on `GZ_SIM_RESOURCE_PATH`.
 Add `--name <name>` to generate an instance under another name.
 
-(several-vehicles)=
-
 ## Several vehicles
 
 Every instance of the vehicle goes by one name, which is at once its

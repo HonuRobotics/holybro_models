@@ -20,7 +20,7 @@ the [configuration page](configuration.md) lists the slots and
 | Argument | Default | Meaning |
 |---|---|---|
 | `config_file` | the shipped config | Vehicle loadout, expanded at launch. |
-| `name` | `x500` | Instance name: the Gazebo model name, the topic namespace (`/<name>/...`) and the TF prefix; letters, digits and underscores. See {ref}`Several vehicles <several-vehicles>`. |
+| `name` | `x500` | Instance name: the Gazebo model name, the topic namespace (`/<name>/...`) and the TF prefix; letters, digits and underscores. See [Several vehicles](../../how-to/index.md#several-vehicles). |
 | `x`, `y`, `z` | `0`, `0`, `0.25` | Spawn position (m); the default drops onto the landing gear. |
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the ground world | Vehicle free world SDF to spawn into. |

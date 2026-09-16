@@ -31,7 +31,7 @@ guide.
 | `/<name>/gps/fix` | Position fix | [sensor_msgs/msg/NavSatFix](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/NavSatFix.html) |
 
 `<name>` is the instance name, `x500` for the default instance, or
-whatever the quad was spawned as ({ref}`Several vehicles <several-vehicles>`).
+whatever the quad was spawned as ([Several vehicles](../../how-to/index.md#several-vehicles)).
 A part topic follows the part's own name (`gps` above), so a part renamed
 or removed in the config moves or drops its topics
 ([Configuration](configuration.md)).
