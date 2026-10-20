@@ -11,4 +11,4 @@ until original art replaces them:
   License: BSD-3-Clause (copy in holybro_parts/models/LICENSE).
 
 Model geometry, inertias and motor constants also derive from the
-BSD-3-Clause PX4 x500 model. See x500_description/ASSETS.md for details.
+BSD-3-Clause PX4 x500 model. See docs/design/index.md for details.
