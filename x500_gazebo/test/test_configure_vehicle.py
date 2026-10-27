@@ -47,7 +47,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
     for name in ('x500.urdf', 'model.sdf', 'model.config', 'ros_gz_bridge.yaml',
-                 'robot_description.yaml'):
+                 'robot_description.yaml', 'x500.rviz'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'x500.urdf') == links(DESC_SHARE / 'urdf' / 'x500.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
@@ -132,6 +132,12 @@ def test_name_flows_to_every_artifact(tmp_path):
     gz_topics = {e['gz_topic_name'] for e in bridge}
     assert '/uav_b/imu' in gz_topics and '/uav_b/joint_states' in gz_topics, gz_topics
     assert not any(t.startswith('/x500/') for t in gz_topics), gz_topics
+    # RViz looks at the instance's frames.
+    rviz = yaml.safe_load((out_dir / 'x500.rviz').read_text())['Visualization Manager']
+    assert rviz['Global Options']['Fixed Frame'] == 'uav_b/base_link'
+    assert rviz['Views']['Current']['Target Frame'] == 'uav_b/base_link'
+    robot = [d for d in rviz['Displays'] if d['Class'] == 'rviz_default_plugins/RobotModel']
+    assert robot and all(d['TF Prefix'] == 'uav_b' for d in robot)
 
 
 def test_name_gives_each_instance_its_own_cache_directory():

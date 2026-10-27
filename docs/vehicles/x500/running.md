@@ -25,6 +25,7 @@ the [configuration page](configuration.md) lists the slots and
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the ground world | Vehicle free world SDF to spawn into. |
 | `gui` | `true` | Start the Gazebo GUI. |
+| `rviz` | `false` | Start RViz on the instance's frames. |
 | `use_composition` | `true` | Run the server, the bridge and the state publisher in one process. |
 
 ## Choosing the world
@@ -42,15 +43,22 @@ ros2 launch x500_gazebo sim.launch.xml world:="$(ros2 pkg prefix --share x500_ga
 
 ## In RViz
 
-To see the model in RViz, without Gazebo:
+To watch the simulation in RViz, ask the sim launch for it:
+
+```bash
+ros2 launch x500_gazebo sim.launch.xml rviz:=true
+```
+
+The frames carry the instance name (`<name>/base_link`), so this RViz has
+its fixed frame and its RobotModel TF prefix set to the instance.
+
+To see the model in RViz without Gazebo, with sliders to spin the rotors:
 
 ```bash
 ros2 launch x500_description display.launch.xml
 ```
 
-In a simulation the frames carry the instance name (`<name>/base_link`)
-and joint states arrive as `/<name>/joint_states`, so RViz next to
-`sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
-joint states pointed at the instance.
+This launch stands alone: it runs a state publisher of its own, so do not
+run it next to `sim.launch.xml`.
 
 ![](../../img/rviz.png)
