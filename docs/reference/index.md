@@ -57,11 +57,11 @@ half assembled vehicle.
 | Type | What | Notes |
 |---|---|---|
 | `x500_airframe` | X500 V2 frame kit as one body | the assembly root; declares every slot |
-| `prop_1345_ccw`, `prop_1345_cw` | 1345 propellers with motor bell | carry the drive table; continuous joints |
-| `battery_4s` | 4S LiPo pack | box placeholder |
-| `companion_computer` | RPi 4 / Jetson class computer | box placeholder |
-| `gps_mast` | GPS module on a mast | `antenna` frame carries the NavSat |
-| `gimbal_camera` | A8 mini class gimbal camera | box placeholder |
+| `prop_1045_ccw`, `prop_1045_cw` | 1045 propellers with the 2216 motor bell | carry the drive table; continuous joints |
+| `battery_4s` | 4S 5000 mAh LiPo pack | hangs below the battery pad |
+| `companion_computer` | Raspberry Pi 5 on standoffs | on the top plate |
+| `gps_mast` | Holybro GPS mount with an M10 puck | `antenna` frame carries the NavSat |
+| `gimbal_camera` | SIYI A8 mini gimbal camera | under the payload rails |
 
 ## Topics
 

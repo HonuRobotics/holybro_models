@@ -12,7 +12,7 @@ ros2 launch x500_gazebo sim.launch.xml
 Gazebo opens with the X500 resting on its landing gear:
 
 - the airframe
-- its four 1345 propellers
+- its four 1045 propellers
 - the 4S battery
 - the GPS mast
 

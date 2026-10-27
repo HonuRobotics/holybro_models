@@ -32,8 +32,8 @@ DEFAULT_CONFIG = (SHARE / 'config' / 'x500.yaml').read_text()
 
 # What the airframe slots fill with when the config is silent.
 DEFAULT_LOADOUT = {'base_link': 'x500_airframe',
-                   'rotor_0': 'prop_1345_ccw', 'rotor_1': 'prop_1345_ccw',
-                   'rotor_2': 'prop_1345_cw', 'rotor_3': 'prop_1345_cw',
+                   'rotor_0': 'prop_1045_ccw', 'rotor_1': 'prop_1045_ccw',
+                   'rotor_2': 'prop_1045_cw', 'rotor_3': 'prop_1045_cw',
                    'battery': 'battery_4s', 'gps': 'gps_mast'}
 
 
@@ -106,7 +106,7 @@ def test_quad_x_spin_convention():
     parts = manifest(root)
     for number in range(4):
         expected = 'ccw' if number < 2 else 'cw'
-        assert parts[f'rotor_{number}'] == f'prop_1345_{expected}'
+        assert parts[f'rotor_{number}'] == f'prop_1045_{expected}'
     joints = {j.get('name'): j.get('type') for j in root.findall('joint')}
     for number in range(4):
         # Propellers declare a drive table, so they land on continuous joints.
@@ -126,7 +126,7 @@ def test_slot_override_and_none():
 
 def test_slot_rejects_parts_that_do_not_fit():
     """A type outside the slot's accepts list fails the expansion."""
-    expect_failure(make_config([{'slot': 'rotor_0', 'type': 'prop_1345_cw'}]),
+    expect_failure(make_config([{'slot': 'rotor_0', 'type': 'prop_1045_cw'}]),
                    'does not fit')
 
 

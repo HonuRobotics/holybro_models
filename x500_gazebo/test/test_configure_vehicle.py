@@ -46,8 +46,8 @@ def links(urdf_path):
 def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
-    for name in ('x500.urdf', 'model.sdf', 'model.config', 'ros_gz_bridge.yaml',
-                 'robot_description.yaml'):
+    for name in ('x500.urdf', 'x500_gz.urdf', 'model.sdf', 'model.config',
+                 'ros_gz_bridge.yaml', 'robot_description.yaml'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'x500.urdf') == links(DESC_SHARE / 'urdf' / 'x500.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
@@ -57,9 +57,11 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     assert [s.get('name') for s in generated.iter('sensor')] == \
         [s.get('name') for s in installed.iter('sensor')]
     assert len(list(generated.iter('plugin'))) == len(list(installed.iter('plugin')))
-    # The generated model merges the generated URDF.
+    # The generated model merges the Gazebo flavoured URDF: the same links,
+    # but its glTF visuals carry the roll RViz applies by itself.
     uri = next(generated.iter('include')).find('uri').text
-    assert uri == f'file://{out / "x500.urdf"}'
+    assert uri == f'file://{out / "x500_gz.urdf"}'
+    assert links(out / 'x500_gz.urdf') == links(out / 'x500.urdf')
 
 
 def test_custom_loadout_flows_to_every_artifact(tmp_path):

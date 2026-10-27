@@ -1,0 +1,198 @@
+# Commission: Holybro X500 V2, every part modeled from dimensions.
+#
+# The gltf-robotics commission (https://github.com/HonuRobotics/gltf-robotics,
+# docs/commission-template.yaml) for every part in holybro_parts/models. After
+# exporting each part:
+#
+#     gltf-manifest commission-x500.yaml <part>_visual.glb
+#
+# docs/vehicles/x500/images/datums.png shows each part's origin and axes.
+
+commission: holybro_x500_v2
+
+creator: Honu Robotics
+rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
+# authoringSource is left out: the parts are rebuilt by scripts from dimensions,
+# and the .blend files they write are not archived.
+
+# For the modeler to read. Not written to any file.
+sources:
+  - "https://docs.holybro.com/drone-development-kit/px4-development-kit-x500v2 (specifications)"
+# Metals: partially metallic (0.3 to 0.65) over a bright base color, by factor or by
+# metal-rough map. Gazebo (Jetty 10.5.0 and Rotary 11.0.0~pre2) renders metalness 1
+# black but for the highlight, for want of an environment map (gltf-robotics issue
+# #1), while 0.3 to 0.6 reads as satin metal. gltf-check fails the metallic factors
+# of real metal on four parts; this is a deliberate deviation. Every finished
+# material carries baked maps: normals with rounded edges and detail relief,
+# base color with baked occlusion and edge finish, packed roughness and metalness.
+# Occlusion maps are not used: Gazebo adds them as light. After the bake, faces the
+# part hides from itself (screw threads in their holes, faces clamped together) are
+# deleted; nothing visible changes.
+toolchain:
+  blender: "5.2.2 LTS"
+  exporter: "io_scene_gltf2 5.2.40"
+
+parts:
+
+  x500_airframe:
+    partRole: base
+    datumPoint: "center of the 30.5 mm flight controller mounting hole pattern, on the lower face of the bottom plate"
+    datumTarget: "the four M3 holes of the 30.5 mm pattern in the bottom plate"
+    source: "modeled from dimensions: the kit's published sizes and the hole, screw and tube positions of the kit; plate outlines, molded parts, a generic power module, a standard XT60 and ISO screws drawn by script; flight controller, telemetry radio, RC receiver, ESCs, wiring and cable ties modeled from published sizes"
+    dimensionSource: "https://docs.holybro.com/drone-development-kit/px4-development-kit-x500v2"
+    # nominalDimension is left out on purpose: none of Holybro's published figures
+    # (wheelbase 500 mm, plates 144 x 144 mm, landing gear height 215 mm) is an
+    # overall extent of this part, which is what gltf-check compares against.
+    # Measured instead: datum to the bottom of the skid foam is 215.3 mm, against
+    # the published landing gear height of 215 mm.
+
+    referenceImages:
+      - "Holybro X500 V2 product photos on the specifications page"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "the end carrying the camera bracket slot; the GPS mast stands at the rear. In Blender it faces -Y, so the file faces +Z"
+    visualRequirement: "viewed from 1 m and beyond; plates, arm tubes, motor seats, landing gear and payload rails recognizable; ISO socket head screws and nylon insert nuts at their measured places"
+    materials: "carbon fiber plates and tubes: 2/2 twill, clear coated, glossy crowns; milled plate edges matte grey. Injection molded clamps and seats: black, matte, polished wear on edges. Skid foam: closed cell EVA. Fasteners: black oxide, partly metallic. Avionics: anodized and brushed aluminum cases with machined edges, printed lids, lit LEDs, silicone and multi wire cables"
+    openings: "none"
+    priorities: "1. overall shape and proportions. 2. arm and landing gear layout. 3. material contrast"
+    notes: "Excludes the motors, GPS mast and the camera and optical flow accessories, which are separate parts or not part of the frame kit. The avionics and wiring are representative of a typical X500 V2 build, not measured. Carries the four motor stators as visuals at the motor seats: x, y 0.17737 m on each diagonal, the stator datum 0.022 m above this one"
+
+  motor_2216_stator:
+    partRole: component
+    datumPoint: "center of the motor base's mounting face, on the motor axis"
+    source: "modeled from the 2216 size and the standard 16 x 19 mm mounting pattern: a cross base, a 12 slot wound stator"
+    dimensionSource: "https://st.robu.in/?p=1429635"
+    nominalDimension: "motor diameter 28 mm"
+    dimensionTolerance: 0.001
+
+    referenceImages:
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "none: rotationally symmetric about the motor axis; up is the prop end"
+    visualRequirement: "viewed from 1 m; base cross and the windings through the bell vents"
+    materials: "base: black anodized aluminum with machined edges, partly metallic. Core: epoxy coated laminations; tooth tips bare steel. Windings: enamelled copper turns, partly metallic"
+    openings: "the base's spokes leave openings to the windings from below"
+    priorities: "1. base shape. 2. copper showing through the bell's vents"
+    notes: "Static half of the motor, fitted to the airframe link at each motor seat. Keeps only what can be seen under its bell, judged at 24 bell angles on each airframe motor seat: the hub, the tooth bodies and each turn's inner half are left out"
+
+  motor_2216_bell:
+    partRole: component
+    datumPoint: "center of the bell's top face, where the prop seats, on the motor axis"
+    source: "modeled from the 2216 size: a vented can, the magnet ring, the shaft and prop adapter"
+    dimensionSource: "https://st.robu.in/?p=1429635"
+    nominalDimension: "motor diameter 28 mm"
+    dimensionTolerance: 0.001
+
+    referenceImages:
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "none: rotationally symmetric; up is the prop end"
+    visualRequirement: "viewed from 1 m; bell, vents and shaft"
+    materials: "bell: black anodized aluminum with machined (diamond cut) edges and a laser marking. Shaft: steel. Both partly metallic"
+    openings: "three vents in the top and six notches at the skirt"
+    priorities: "1. bell shape and vents. 2. the marking band. 3. diamond cut edges"
+    notes: "Rotating half of the motor, carried by the rotor link with the prop; its datum is the prop's"
+
+  prop_1045_ccw:
+    partRole: component
+    datumPoint: "center of the hub's lower face, which seats on the motor bell, on the rotation axis"
+    source: "modeled from the published size, 10 x 4.5 inch"
+    dimensionSource: "https://robu.in/product/holybro-1045-propeller-2-pair-cwccw-black/"
+    nominalDimension: "diameter 254 mm"
+    dimensionTolerance: 0.002
+
+    referenceImages:
+      - "product photos at the dimension source; the CW and CCW props are mirror images"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "none: a rotor; the blades lie along X by convention"
+    visualRequirement: "viewed from 1 m; blade twist and taper, hub and self-locking nut"
+    materials: "blades and hub: black glass filled nylon, glossy, printed size and rotation arrow on top. Nut: nickel plated, partly metallic"
+    openings: "hub bore, filled by the motor shaft and nut"
+    priorities: "1. blade shape and handedness. 2. hub and nut. 3. printed markings"
+    notes: "Turns counterclockwise seen from above (rotor_0, rotor_1). Same datum and geometry as prop_1045_cw, mirrored"
+
+  prop_1045_cw:
+    partRole: component
+    datumPoint: "center of the hub's lower face, which seats on the motor bell, on the rotation axis"
+    source: "modeled from the published size, 10 x 4.5 inch, mirror of the CCW prop"
+    dimensionSource: "https://robu.in/product/holybro-1045-propeller-2-pair-cwccw-black/"
+    nominalDimension: "diameter 254 mm"
+    dimensionTolerance: 0.002
+
+    referenceImages:
+      - "product photos at the dimension source; the CW and CCW props are mirror images"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "none: a rotor; the blades lie along X by convention"
+    visualRequirement: "viewed from 1 m; blade twist and taper, hub and self-locking nut"
+    materials: "blades and hub: black glass filled nylon, glossy, printed size and rotation arrow on top. Nut: nickel plated, partly metallic"
+    openings: "hub bore, filled by the motor shaft and nut"
+    priorities: "1. blade shape and handedness. 2. hub and nut. 3. printed markings"
+    notes: "Turns clockwise seen from above (rotor_2, rotor_3). Same datum and geometry as prop_1045_ccw, mirrored"
+
+  gps_mast:
+    partRole: component
+    datumPoint: "center of the base clamp's lower face, on the mast axis"
+    source: "modeled from sizes measured on the kit's GPS mount: a folding mast with a knurled lock, a 4 mm carbon mast and a tray; an M10 puck modeled from its published size"
+    dimensionSource: "https://www.readymaderc.com/products/details/86930-holybro-m10-gps-with-standard-10-pin-connector"
+    nominalDimension: "puck diameter 50 mm"
+    dimensionTolerance: 0.001
+
+    referenceImages:
+      - "Holybro M10 GPS product photos at the dimension source"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "the arrow on the puck's lid points forward"
+    visualRequirement: "viewed from 1 m; clamp, mast, tray and puck with its arrow"
+    materials: "mount: black plastic, knurled. Mast: carbon. Puck: glossy black, printed lid, chrome trim, lit status LED and safety switch ring"
+    openings: "none"
+    priorities: "1. mast and puck proportions. 2. the lid's arrow. 3. status LED and switch ring"
+    notes: "Fits the airframe's gps slot at the rear of the frame"
+
+  battery_4s:
+    partRole: component
+    datumPoint: "center of the pack's top face, which straps against the battery pad"
+    source: "modeled from the usual 4S 5000 mAh pack size"
+    # dimensionSource and nominalDimension are left out: the pack is a generic
+    # 145 x 48 x 38 mm 4S 5000 mAh, with no one product to cite, and its straps and
+    # leads make every overall extent larger than the pack.
+
+    referenceImages:
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "the end without leads faces forward; the leads leave the rear"
+    visualRequirement: "viewed from 1 m; pack, label, XT60 and balance plugs"
+    materials: "wrap: glossy shrink film with printed generic labels. Straps: woven hook and loop with a metal buckle. Leads: silicone, plugged into the airframe XT60H. XT60: yellow nylon"
+    openings: "none"
+    priorities: "1. pack proportions. 2. the label. 3. leads plugged into the airframe's XT60"
+    notes: "Fits the airframe's battery slot under the plates; the leads end in an XT60 mated to the airframe's lead"
+
+  companion_computer:
+    partRole: component
+    datumPoint: "center of the 58 x 49 mm mounting hole pattern, on the standoffs' lower faces"
+    source: "Raspberry Pi 5 modeled from its mechanical drawing"
+    dimensionSource: "https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-mechanical-drawing.pdf"
+    nominalDimension: "board width 56 mm"
+    dimensionTolerance: 0.001
+
+    referenceImages:
+      - "the mechanical drawing at the dimension source"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "the port edge faces the rear"
+    visualRequirement: "viewed from 0.5 m; board, SoC, ports and header recognizable"
+    materials: "solder mask: glossy green over generated copper, gold pads, white silkscreen. Shields, heatsink and pins partly metallic. LEDs emissive"
+    openings: "the ports' sockets"
+    priorities: "1. board outline and ports. 2. cooler. 3. small parts and silkscreen"
+    notes: "Optional; fits the airframe's companion slot on the top plate. Generic markings, no brand marks"
+
+  gimbal_camera:
+    partRole: component
+    datumPoint: "center of the mounting plate's upper face"
+    source: "SIYI A8 mini modeled from its published size"
+    dimensionSource: "https://www.mybotshop.de/SIYI-A8-Mini-Gimbal-Camera_1"
+    nominalDimension: "width 55 mm"
+    dimensionTolerance: 0.001
+
+    referenceImages:
+      - "SIYI A8 mini product photos at the dimension source"
+      - "docs/vehicles/x500/images/datums.png: the origin and axes of every part"
+    forwardFeature: "the lens faces forward"
+    visualRequirement: "viewed from 1 m; plate, dampers, motors, head and lens"
+    materials: "housings: dark anodized aluminum with machined edges, partly metallic. Lens: metal bezel, printed ring, coated glass, not metallic"
+    openings: "none"
+    priorities: "1. head and lens. 2. plate and dampers. 3. markings"
+    notes: "Optional; fits the airframe's gimbal slot under the front of the plates. Generic markings, no brand marks"

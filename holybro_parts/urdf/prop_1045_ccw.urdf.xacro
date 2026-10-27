@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
 <!--
-  prop_1345_ccw part macro: a 1345 propeller with its rotating motor bell,
-  the counter clockwise rotor of the X500 quad X pair.
+  prop_1045_ccw part macro: a 1045 (10 x 4.5 inch) propeller with the
+  rotating bell of its Holybro 2216 motor, the counter clockwise rotor of the X500
+  quad X pair.
 
-  Mesh, inertia and collision are PX4's BSD 3 Clause x500 values
-  (models/LICENSE); the bell is the HoverGames 5010, a placeholder for the
-  Holybro 2216. Drive: the multicopter motor plant constants a simulator
-  needs to spin this prop on its joint (PX4's values; identify for the
-  real 2216 + 1045 pair).
+  Visuals: models/prop_1045_ccw/prop_1045_ccw_visual.glb and
+  models/motor_2216/motor_2216_bell_visual.glb. Both datums are the prop
+  seat on the rotation axis (the bell's top face, the hub's lower face),
+  which is this part's frame; the airframe places the rotor slot there.
+  Inertia, collision thickness and the drive constants are still PX4's
+  BSD 3 Clause x500 values (models/LICENSE); identify them for the real
+  2216 + 1045 pair.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
@@ -15,7 +18,7 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="prop_1345_ccw_info">
+  <xacro:macro name="prop_1045_ccw_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
         slots=dict(
@@ -28,34 +31,24 @@
                    velocity_slowdown_sim=10))}"/>
   </xacro:macro>
 
-  <xacro:macro name="prop_1345_ccw"
+  <xacro:macro name="prop_1045_ccw"
                params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
-    <xacro:prop_1345_ccw_info/>
+    <xacro:prop_1045_ccw_info/>
 
     <link name="${name}">
       <inertial>
         <mass value="0.016076923076923075"/>
-        <inertia ixx="3.8464910483993325e-07" ixy="0" ixz="0"
-                 iyy="2.6115851691700804e-05" iyz="0" izz="2.649858234714004e-05"/>
+        <inertia ixx="2.6115851691700804e-05" ixy="0" ixz="0"
+                 iyy="3.8464910483993325e-07" iyz="0" izz="2.649858234714004e-05"/>
       </inertial>
-      <visual>
-        <origin xyz="-0.022 -0.14638461538461536 -0.016" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://holybro_parts/models/prop_1345_ccw/1345_prop_ccw.stl"
-                scale="0.8461538461538461 0.8461538461538461 0.8461538461538461"/>
-        </geometry>
-        <material name="${name}_grey"><color rgba="0.25 0.25 0.25 1"/></material>
-      </visual>
-      <visual>
-        <origin xyz="0 0 -0.032" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://holybro_parts/models/prop_1345_ccw/5010Bell.dae"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://holybro_parts/models/motor_2216/motor_2216_bell_visual.glb"/>
+      <xacro:part_visual mesh="package://holybro_parts/models/prop_1045_ccw/prop_1045_ccw_visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
+          <!-- The blade's span at hub height, along the part's Y like the visual. -->
+          <origin xyz="0 0 0.006" rpy="0 0 0"/>
           <geometry>
-            <box size="0.2792307692307692 0.016923076923076923 0.0008461538461538462"/>
+            <box size="0.016923076923076923 0.254 0.0008461538461538462"/>
           </geometry>
         </collision>
       </xacro:if>

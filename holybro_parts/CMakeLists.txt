@@ -9,7 +9,7 @@ find_package(ament_cmake_python REQUIRED)
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
-# models/ carries the meshes (PX4 BSD 3 placeholders, see models/LICENSE);
+# models/ carries the glTF visuals, one directory per part (models/README.md);
 # urdf/ carries the parts, one macro file each, the parts level library
 # that includes them and the assembly dispatcher.
 install(DIRECTORY

@@ -68,18 +68,25 @@
 
   <!-- ===== helpers used by every part macro ===== -->
 
-  <!-- glTF meshes are Y-up by specification and the delivered .glb files
-       conform. RViz and other ROS tools rotate them to Z-up on load; Gazebo
-       does not (it shows the data as is), so the URDF Gazebo merges is
-       expanded with gltf_up:=z, which pre-rotates every glTF visual by +90
-       degrees about x. The installed ROS URDF keeps gltf_up=y (no rotation). -->
+  <!-- Delivered .glb parts are in glTF's own axes (Honu glTF Asset Profile,
+       Axes): +Y up, +Z forward, origin on the part's datum. Placing one on a
+       link takes a fixed rotation, roll 90 degrees then yaw 90 degrees, and
+       the consumers differ in how much of it they apply themselves:
+         RViz (Lyrical and later) rolls glTF +90 about x on load, so the ROS
+           URDF carries only the yaw: rpy 0 0 1.5708 (gltf_up:=y, the default);
+         Gazebo applies nothing, so the URDF Gazebo merges carries the whole
+           rotation: rpy 1.5708 0 1.5708 (x500_gazebo expands with gltf_up:=z).
+       A part may add a yaw about the link's z axis on top, e.g. to clock a
+       motor's mounting pattern. -->
   <xacro:arg name="gltf_up" default="y"/>
-  <xacro:property name="gltf_visual_rpy" value="${'1.5708 0 0' if '$(arg gltf_up)' == 'z' else '0 0 0'}"/>
+  <xacro:property name="gltf_roll" value="${1.5708 if '$(arg gltf_up)' == 'z' else 0.0}"/>
 
-  <!-- A part's visual mesh, with the glTF up axis handling above. -->
-  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0'">
+  <!-- A part's visual: one .glb, placed at xyz with the rotation above. No
+       <material>: the file's own PBR materials render, and a URDF or SDF
+       material would replace every one of them. -->
+  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0' yaw:=0">
     <visual>
-      <origin xyz="${xyz}" rpy="${gltf_visual_rpy}"/>
+      <origin xyz="${xyz}" rpy="${gltf_roll} 0 ${1.5708 + float(yaw)}"/>
       <geometry>
         <mesh filename="${mesh}"/>
       </geometry>
@@ -149,8 +156,8 @@
   <xacro:include filename="$(find holybro_parts)/urdf/companion_computer.urdf.xacro"/>
   <xacro:include filename="$(find holybro_parts)/urdf/gimbal_camera.urdf.xacro"/>
   <xacro:include filename="$(find holybro_parts)/urdf/gps_mast.urdf.xacro"/>
-  <xacro:include filename="$(find holybro_parts)/urdf/prop_1345_ccw.urdf.xacro"/>
-  <xacro:include filename="$(find holybro_parts)/urdf/prop_1345_cw.urdf.xacro"/>
+  <xacro:include filename="$(find holybro_parts)/urdf/prop_1045_ccw.urdf.xacro"/>
+  <xacro:include filename="$(find holybro_parts)/urdf/prop_1045_cw.urdf.xacro"/>
   <xacro:include filename="$(find holybro_parts)/urdf/x500_airframe.urdf.xacro"/>
 
 </robot>

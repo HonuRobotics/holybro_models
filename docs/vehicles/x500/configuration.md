@@ -13,7 +13,7 @@ fitted options and their topics live in [Sensors](sensors.md) and
 
 | Slot | Accepts | Default |
 |---|---|---|
-| `rotor_0` .. `rotor_3` | the matching 1345 propeller | fitted |
+| `rotor_0` .. `rotor_3` | the matching 1045 propeller | fitted |
 | `battery` | `battery_4s` | fitted |
 | `gps` | `gps_mast` | fitted |
 | `companion` | `companion_computer` | empty |

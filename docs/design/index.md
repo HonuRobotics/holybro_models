@@ -53,16 +53,18 @@ composition). Extracting the machinery into a common package is planned.
 
 ## Assets
 
-The meshes are **temporary placeholders**, reused from PX4's
-[PX4-gazebo-models](https://github.com/PX4/PX4-gazebo-models) x500 model
-(BSD 3 Clause, `holybro_parts/models/LICENSE`). Two things to know about
-them:
+Every visual is a glTF part (`.glb`) built to the
+[Honu glTF Asset Profile](https://github.com/HonuRobotics/gltf-robotics):
+one part per file, in glTF's own axes, with its origin on a named datum and
+its PBR materials embedded. Every part is modeled by script from the kit's
+dimensions.
+`holybro_parts/models/README.md` lists each part, its datum and its source.
 
-- The frame is the NXP HoverGames body. It is geometrically close to the
-  Holybro X500 V2 shell, but it is not the same shell.
-- The motor bell is the HoverGames 5010.
+A glTF visual needs a fixed rotation onto the link's axes, and the two
+consumers differ: RViz rolls glTF onto ROS axes as it loads, Gazebo does
+not. `part_visual` (in `parts.xacro`) writes the right rotation for each,
+and `x500_gazebo` expands its own copy of the URDF with `gltf_up:=z`.
 
-The inertias, rotor poses and motor constants are PX4's matched, hover
-tuned set, so the vehicle flies correctly even though it does not look
-exactly right. Original Holybro art (glTF, PBR) will replace the
-placeholders part by part.
+The slot positions are the kit's measured ones. The inertias and motor
+constants are still PX4's matched, hover tuned x500 set (BSD 3 Clause,
+`holybro_parts/models/LICENSE`).

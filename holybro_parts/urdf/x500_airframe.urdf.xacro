@@ -1,14 +1,23 @@
 <?xml version="1.0"?>
 <!--
   x500_airframe part macro: the Holybro X500 V2 frame kit as one rigid body
-  (carbon top/bottom plates, four arms with their static lower motor
-  housings, landing gear), the assembly root of the X500.
+  (carbon top/bottom plates, four arms with their motor seats, landing gear,
+  payload rails and battery tray, with the static half of each motor), the
+  assembly root of the X500.
 
-  Geometry, inertia and collision boxes are reused from PX4's BSD 3 Clause
-  x500 gz model (github.com/PX4/PX4-gazebo-models); the frame mesh is the
-  NXP HoverGames body, a close PLACEHOLDER for the true X500 V2 shell
-  (models/LICENSE). Mass is the bare airframe; the battery and payload
-  parts make up the rest of the all up weight.
+  Visuals: models/x500_airframe/x500_airframe_visual.glb, modeled from the
+  kit's dimensions, and models/motor_2216/motor_2216_stator_visual.glb
+  on each motor seat. The frame's datum, and so base_link, is the center of
+  the 30.5 mm flight controller hole pattern on the lower face of the bottom
+  plate. Slot positions are the kit's measured ones: motor axes 0.17737 m
+  out along each diagonal, motor base faces on the seats 0.022 m up and the
+  prop seat on the bell 0.031 m above that.
+
+  Inertia is still PX4's BSD 3 Clause x500 lumped tensor (models/LICENSE).
+  Collisions are boxes and cylinders fitted to the kit's measured outer shell: center
+  stack, arms, motor seats and stators, payload rails, landing gear. Mass is the bare
+  airframe; the battery and payload parts make up the rest of the all up
+  weight.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
@@ -28,28 +37,36 @@
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
         slots=dict(
-            rotor_0=dict(xyz='0.174 -0.174 0.06', rpy='0 0 0', accepts=['prop_1345_ccw'], default='prop_1345_ccw'),
-            rotor_1=dict(xyz='-0.174 0.174 0.06', rpy='0 0 0', accepts=['prop_1345_ccw'], default='prop_1345_ccw'),
-            rotor_2=dict(xyz='0.174 0.174 0.06', rpy='0 0 0', accepts=['prop_1345_cw'], default='prop_1345_cw'),
-            rotor_3=dict(xyz='-0.174 -0.174 0.06', rpy='0 0 0', accepts=['prop_1345_cw'], default='prop_1345_cw'),
-            battery=dict(xyz='0 0 -0.045', rpy='0 0 0', accepts=['battery_4s'], default='battery_4s'),
-            companion=dict(xyz='-0.05 0 0.045', rpy='0 0 0', accepts=['companion_computer'], default='none'),
-            gps=dict(xyz='-0.11 0 0.045', rpy='0 0 0', accepts=['gps_mast'], default='gps_mast'),
-            gimbal=dict(xyz='0.12 0 -0.05', rpy='0 0 0', accepts=['gimbal_camera'], default='none'),
+            rotor_0=dict(xyz='0.17737 -0.17737 0.053', rpy='0 0 0', accepts=['prop_1045_ccw'], default='prop_1045_ccw'),
+            rotor_1=dict(xyz='-0.17737 0.17737 0.053', rpy='0 0 0', accepts=['prop_1045_ccw'], default='prop_1045_ccw'),
+            rotor_2=dict(xyz='0.17737 0.17737 0.053', rpy='0 0 0', accepts=['prop_1045_cw'], default='prop_1045_cw'),
+            rotor_3=dict(xyz='-0.17737 -0.17737 0.053', rpy='0 0 0', accepts=['prop_1045_cw'], default='prop_1045_cw'),
+            battery=dict(xyz='0 0 -0.0485', rpy='0 0 0', accepts=['battery_4s'], default='battery_4s'),
+            companion=dict(xyz='-0.02 0 0.032', rpy='0 0 0', accepts=['companion_computer'], default='none'),
+            gps=dict(xyz='-0.099 0 -0.026', rpy='0 0 0', accepts=['gps_mast'], default='gps_mast'),
+            gimbal=dict(xyz='0.10 0 -0.0177', rpy='0 0 0', accepts=['gimbal_camera'], default='none'),
         ),
         frames=dict(
         ))}"/>
   </xacro:macro>
 
-  <!-- One static lower motor housing (part of the frame; the bells spin
-       with the props). -->
-  <xacro:macro name="x500_motor_housing" params="xyz">
-    <visual>
-      <origin xyz="${xyz}" rpy="0 0 -0.45"/>
-      <geometry>
-        <mesh filename="package://holybro_parts/models/x500_airframe/5010Base.dae"/>
-      </geometry>
-    </visual>
+  <!-- One arm's collisions, on the diagonal (sx, sy): tube from the clamps
+       to the seat, the seat, and the motor up to the bell's top (the bell
+       turns with the rotor link, but its outline does not change). -->
+  <xacro:macro name="x500_arm_collision" params="arm sx sy">
+    <xacro:property name="_u" value="${0.14 / sqrt(2)}"/>
+    <collision name="arm_${arm}">
+      <origin xyz="${sx*_u} ${sy*_u} 0.016" rpy="0 ${pi/2} ${atan2(sy, sx)}"/>
+      <geometry><cylinder radius="0.008" length="0.16"/></geometry>
+    </collision>
+    <collision name="motor_seat_${arm}">
+      <origin xyz="${sx*0.1734} ${sy*0.1734} 0.016" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.027" length="0.022"/></geometry>
+    </collision>
+    <collision name="motor_${arm}">
+      <origin xyz="${sx*0.17737} ${sy*0.17737} 0.04225" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.014" length="0.0405"/></geometry>
+    </collision>
   </xacro:macro>
 
   <xacro:macro name="x500_airframe"
@@ -65,38 +82,59 @@
         <inertia ixx="0.02166666666666667" ixy="0" ixz="0"
                  iyy="0.02166666666666667" iyz="0" izz="0.04000000000000001"/>
       </inertial>
-      <!-- Carbon frame; the mesh carries its CF.png diffuse texture. -->
-      <visual>
-        <origin xyz="0 0 0.025" rpy="0 0 3.141592654"/>
-        <geometry>
-          <mesh filename="package://holybro_parts/models/x500_airframe/NXP-HGD-CF.dae"/>
-        </geometry>
-      </visual>
-      <xacro:x500_motor_housing xyz="0.174 0.174 0.032"/>
-      <xacro:x500_motor_housing xyz="-0.174 0.174 0.032"/>
-      <xacro:x500_motor_housing xyz="0.174 -0.174 0.032"/>
-      <xacro:x500_motor_housing xyz="-0.174 -0.174 0.032"/>
+      <xacro:part_visual mesh="package://holybro_parts/models/x500_airframe/x500_airframe_visual.glb"/>
+      <xacro:property name="_stator" value="package://holybro_parts/models/motor_2216/motor_2216_stator_visual.glb"/>
+      <xacro:part_visual mesh="${_stator}" xyz="0.17737 0.17737 0.022"/>
+      <xacro:part_visual mesh="${_stator}" xyz="-0.17737 0.17737 0.022"/>
+      <xacro:part_visual mesh="${_stator}" xyz="0.17737 -0.17737 0.022"/>
+      <xacro:part_visual mesh="${_stator}" xyz="-0.17737 -0.17737 0.022"/>
       <xacro:if value="${collision}">
-        <!-- PX4 boxes: central body + two angled legs + two feet. -->
+        <!-- Outer shell, measured, in primitives only (box, cylinder),
+             which DART and MuJoCo both handle natively. Center stack: both
+             plates with the arm clamps and the flight controller on top;
+             below it the payload rails, the battery tray and the GPS
+             platform. -->
         <collision name="body">
-          <origin xyz="0 0 0.007" rpy="0 0 0"/>
-          <geometry><box size="0.35355339059327373 0.35355339059327373 0.05"/></geometry>
+          <origin xyz="0 0 0.013" rpy="0 0 0"/>
+          <geometry><box size="0.145 0.145 0.038"/></geometry>
+        </collision>
+        <collision name="flight_controller">
+          <origin xyz="0.047 0 0.0395" rpy="0 0 0"/>
+          <geometry><box size="0.044 0.085 0.015"/></geometry>
+        </collision>
+        <collision name="rails">
+          <origin xyz="-0.005 0 -0.013" rpy="0 0 0"/>
+          <geometry><box size="0.25 0.0694 0.0094"/></geometry>
+        </collision>
+        <collision name="battery_tray">
+          <origin xyz="0 0 -0.0261" rpy="0 0 0"/>
+          <geometry><box size="0.1 0.0694 0.0408"/></geometry>
+        </collision>
+        <collision name="gps_platform">
+          <origin xyz="-0.099 0 -0.027" rpy="0 0 0"/>
+          <geometry><box size="0.065 0.093 0.002"/></geometry>
+        </collision>
+        <xacro:x500_arm_collision arm="front_right" sx="1" sy="-1"/>
+        <xacro:x500_arm_collision arm="rear_left" sx="-1" sy="1"/>
+        <xacro:x500_arm_collision arm="front_left" sx="1" sy="1"/>
+        <xacro:x500_arm_collision arm="rear_right" sx="-1" sy="-1"/>
+        <!-- Landing gear: two 16 mm struts splayed 0.307 rad from vertical
+             and two skids whose 19 mm foam bottoms 0.2153 m below base_link. -->
+        <collision name="leg_stbd">
+          <origin xyz="0 -0.0865 -0.101" rpy="-0.307 0 0"/>
+          <geometry><cylinder radius="0.008" length="0.208"/></geometry>
         </collision>
         <collision name="leg_port">
-          <origin xyz="0 -0.098 -0.123" rpy="-0.35 0 0"/>
-          <geometry><box size="0.015 0.015 0.21"/></geometry>
-        </collision>
-        <collision name="leg_stbd">
-          <origin xyz="0 0.098 -0.123" rpy="0.35 0 0"/>
-          <geometry><box size="0.015 0.015 0.21"/></geometry>
-        </collision>
-        <collision name="foot_port">
-          <origin xyz="0 -0.132 -0.2195" rpy="0 0 0"/>
-          <geometry><box size="0.25 0.015 0.015"/></geometry>
+          <origin xyz="0 0.0865 -0.101" rpy="0.307 0 0"/>
+          <geometry><cylinder radius="0.008" length="0.208"/></geometry>
         </collision>
         <collision name="foot_stbd">
-          <origin xyz="0 0.132 -0.2195" rpy="0 0 0"/>
-          <geometry><box size="0.25 0.015 0.015"/></geometry>
+          <origin xyz="0 -0.120 -0.2058" rpy="0 ${pi/2} 0"/>
+          <geometry><cylinder radius="0.0095" length="0.248"/></geometry>
+        </collision>
+        <collision name="foot_port">
+          <origin xyz="0 0.120 -0.2058" rpy="0 ${pi/2} 0"/>
+          <geometry><cylinder radius="0.0095" length="0.248"/></geometry>
         </collision>
       </xacro:if>
     </link>

@@ -2,8 +2,11 @@
 <!--
   companion_computer part macro: a companion computer (RPi 4 / Jetson class) on the payload plate.
 
-  Sized primitive placeholder (dims from product pages); swap for a real
-  mesh when delivered. Mass and pose matter: accessories set the vehicle
+  Visual: models/companion_computer/companion_computer_visual.glb, a
+  Raspberry Pi 5 on 6 mm standoffs, its ports toward the rear. Its datum, the
+  part frame, is the center of the 58 x 49 mm hole pattern on the standoffs'
+  lower faces; the board sits above it, so the inertia and the collision box
+  sit above the datum. Mass and pose matter: accessories set the vehicle
   center of gravity.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
@@ -29,18 +32,18 @@
 
     <link name="${name}">
       <inertial>
+        <origin xyz="0 0 ${_d[2]/2}" rpy="0 0 0"/>
         <mass value="${_m}"/>
         <inertia ixx="${_m/12.0 * (_d[1]**2 + _d[2]**2)}" ixy="0" ixz="0"
                  iyy="${_m/12.0 * (_d[0]**2 + _d[2]**2)}" iyz="0"
                  izz="${_m/12.0 * (_d[0]**2 + _d[1]**2)}"/>
       </inertial>
-      <visual>
-        <geometry><box size="${_d[0]} ${_d[1]} ${_d[2]}"/></geometry>
-        <material name="${name}_mat"><color rgba="0.2 0.2 0.22 1"/></material>
-      </visual>
+      <xacro:part_visual mesh="package://holybro_parts/models/companion_computer/companion_computer_visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
-          <geometry><box size="${_d[0]} ${_d[1]} ${_d[2]}"/></geometry>
+          <!-- The visual's extent: board, cooler and the ports reaching back. -->
+          <origin xyz="-0.01125 0 0.0116" rpy="0 0 0"/>
+          <geometry><box size="0.0875 0.057 0.0232"/></geometry>
         </collision>
       </xacro:if>
     </link>

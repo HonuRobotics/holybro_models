@@ -10,13 +10,14 @@ running
 actuators
 sensors
 configuration
+visual_asset_commission
 ```
 
 ## The default vehicle
 
 Launch the X500 without a config and you get the airframe with:
 
-- **four 1345 propellers**, in the PX4 quad X layout: rotors 0 and 1 spin
+- **four 1045 propellers**, in the PX4 quad X layout: rotors 0 and 1 spin
   counter clockwise, rotors 2 and 3 clockwise.
 - **the 4S battery**.
 - **the GPS mast**.

@@ -1,2 +1,2 @@
-# PX4 BSD-3 placeholder meshes: no textual diffs in PRs, excluded from language stats.
-x500_description/meshes/** -diff linguist-vendored
+# glTF visual models: binary, no textual diffs, excluded from language stats.
+holybro_parts/models/**/*.glb binary linguist-vendored
