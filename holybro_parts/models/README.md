@@ -31,11 +31,11 @@ occlusion in the base color, polishes or machines edges (diamond cut aluminum,
 worn plastic), and adds relief at physical scale: the carbon twill, molding
 stipple, EVA foam cells, brushed aluminum, heat shrink, stator laminations.
 
-Metals are partly metallic, 0.3 to 0.65 over a bright base color. Gazebo hands
+Metals are partly metallic, 0.25 to 0.65 over a bright base color. Gazebo hands
 embedded glTF materials no environment map, so metalness 1 renders black except
 for the specular highlight (gltf-robotics issue #1), while partial metalness reads
 as satin metal (measured on Jetty 10.5.0 and Rotary 11.0.0~pre2). `gltf-check`
-fails the metallic factors on four parts; this is a deliberate deviation from the
+warns about the metallic factors on four parts; this is a deliberate deviation from the
 profile.
 
 No glTF occlusion map is used: Ogre adds it as a light map (extra light), so

@@ -18,11 +18,11 @@ rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Versio
 # For the modeler to read. Not written to any file.
 sources:
   - "https://docs.holybro.com/drone-development-kit/px4-development-kit-x500v2 (specifications)"
-# Metals: partially metallic (0.3 to 0.65) over a bright base color, by factor or by
+# Metals: partially metallic (0.25 to 0.65) over a bright base color, by factor or by
 # metal-rough map. Gazebo (Jetty 10.5.0 and Rotary 11.0.0~pre2) renders metalness 1
 # black but for the highlight, for want of an environment map (gltf-robotics issue
-# #1), while 0.3 to 0.6 reads as satin metal. gltf-check fails the metallic factors
-# of real metal on four parts; this is a deliberate deviation. Every finished
+# #1), while partial metalness reads as satin metal. gltf-check warns on the metallic
+# factors of real metal on four parts; this is a deliberate deviation. Every finished
 # material carries baked maps: normals with rounded edges and detail relief,
 # base color with baked occlusion and edge finish, packed roughness and metalness.
 # Occlusion maps are not used: Gazebo adds them as light. After the bake, faces the

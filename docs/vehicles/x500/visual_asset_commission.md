@@ -42,8 +42,8 @@ so both sit at the rotor slot's origin.
 ## Deviations from the profile
 
 - **Partial metalness.** Real metal (fasteners, standoffs, pins, laser markings
-  on aluminum) is metallic 0.45 to 0.55, not 1: Gazebo renders full metalness
-  black for want of an environment map. `gltf-check` fails this on four parts.
+  on aluminum) is metallic 0.25 to 0.65, not 1: Gazebo renders full metalness
+  black for want of an environment map. `gltf-check` warns on this for four parts.
 - **No nominal dimension** on the airframe and the battery: none of the
   published figures is an overall extent of the part as modeled. The commission
   says why for each.
