@@ -26,5 +26,5 @@ ros2 launch x500_gazebo sim.launch.xml
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed Apache 2.0 (see
-[LICENSE](LICENSE)); the placeholder meshes are BSD 3 Clause from PX4 (see
-[NOTICE](NOTICE) and `holybro_parts/models/LICENSE`).
+[LICENSE](LICENSE)). The visual models' provenance is in [NOTICE](NOTICE) and
+`holybro_parts/models/README.md`.

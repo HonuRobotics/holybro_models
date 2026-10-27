@@ -39,9 +39,20 @@ add_custom_target(${PROJECT_NAME}_bridge_yaml ALL DEPENDS ${bridge_yaml})
 install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
 # The URDF the model merges, installed next to it so model://x500/x500.urdf
-# resolves. (No Gazebo flavoured copy here: the x500 meshes are dae/stl,
-# which Gazebo and the ROS tools orient identically; only glTF differs.)
-install(FILES ${desc_urdf} DESTINATION share/${PROJECT_NAME}/models/x500)
+# resolves. It is the description expanded again with gltf_up:=z: the parts'
+# visuals are glTF, which RViz rotates onto ROS axes as it loads and Gazebo
+# does not, so Gazebo's copy carries the whole rotation in each visual (see
+# part_visual in holybro_parts/urdf/parts.xacro). Everything else is
+# identical to the installed description.
+set(gz_urdf ${CMAKE_CURRENT_BINARY_DIR}/x500.urdf)
+add_custom_command(
+  OUTPUT ${gz_urdf}
+  COMMAND xacro ${x500_description_DIR}/../urdf/x500.urdf.xacro
+          config_file:=${vehicle_config} gltf_up:=z -o ${gz_urdf}
+  DEPENDS ${vehicle_config} ${desc_urdf}
+  COMMENT "Expanding the Gazebo flavoured x500.urdf (gltf_up:=z)")
+add_custom_target(${PROJECT_NAME}_gz_urdf ALL DEPENDS ${gz_urdf})
+install(FILES ${gz_urdf} DESTINATION share/${PROJECT_NAME}/models/x500)
 
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at
 # build time (reads x500_description/config/x500.yaml, adds the Gazebo

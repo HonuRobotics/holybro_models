@@ -66,7 +66,7 @@ def test_gps_part_bridges_its_fix():
 def test_geometry_only_parts_produce_nothing():
     """Parts without simulated topics add no bridge entries."""
     instances = [('battery_4s', 'battery'), ('companion_computer', 'companion'),
-                 ('gimbal_camera', 'gimbal'), ('prop_1345_ccw', 'rotor_0')]
+                 ('gimbal_camera', 'gimbal'), ('prop_1045_ccw', 'rotor_0')]
     assert set(entries_for({}, instances)) == ALWAYS
 
 

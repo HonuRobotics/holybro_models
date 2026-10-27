@@ -9,8 +9,8 @@ following the [Add a part](../../how-to/index.md) guide.
 
 | Actuator | Part | Slot | Fitted by default |
 |---|---|---|---|
-| 1345 propellers, counter clockwise | `prop_1345_ccw` | `rotor_0`, `rotor_1` | yes |
-| 1345 propellers, clockwise | `prop_1345_cw` | `rotor_2`, `rotor_3` | yes |
+| 1045 propellers, counter clockwise | `prop_1045_ccw` | `rotor_0`, `rotor_1` | yes |
+| 1045 propellers, clockwise | `prop_1045_cw` | `rotor_2`, `rotor_3` | yes |
 
 ## Actuators ROS API
 

@@ -2,9 +2,11 @@
 <!--
   gimbal_camera part macro: a gimbal payload camera (A8 mini class) slung below and forward.
 
-  Sized primitive placeholder (dims from product pages); swap for a real
-  mesh when delivered. Mass and pose matter: accessories set the vehicle
-  center of gravity.
+  Visual: models/gimbal_camera/gimbal_camera_visual.glb, a SIYI A8 mini
+  (55 x 55 x 70 mm). Its datum, the part frame, is the center of the mounting
+  plate's upper face, which bolts under the payload rails; the gimbal hangs
+  below it, so the inertia and the collision box sit half its height down.
+  Mass and pose matter: accessories set the vehicle center of gravity.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
@@ -29,18 +31,18 @@
 
     <link name="${name}">
       <inertial>
+        <origin xyz="0 0 ${-_d[2]/2}" rpy="0 0 0"/>
         <mass value="${_m}"/>
         <inertia ixx="${_m/12.0 * (_d[1]**2 + _d[2]**2)}" ixy="0" ixz="0"
                  iyy="${_m/12.0 * (_d[0]**2 + _d[2]**2)}" iyz="0"
                  izz="${_m/12.0 * (_d[0]**2 + _d[1]**2)}"/>
       </inertial>
-      <visual>
-        <geometry><box size="${_d[0]} ${_d[1]} ${_d[2]}"/></geometry>
-        <material name="${name}_mat"><color rgba="0.2 0.2 0.22 1"/></material>
-      </visual>
+      <xacro:part_visual mesh="package://holybro_parts/models/gimbal_camera/gimbal_camera_visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
-          <geometry><box size="${_d[0]} ${_d[1]} ${_d[2]}"/></geometry>
+          <!-- The visual's extent, mounting plate to the bottom of the head. -->
+          <origin xyz="0 0 -0.0345" rpy="0 0 0"/>
+          <geometry><box size="0.055 0.055 0.069"/></geometry>
         </collision>
       </xacro:if>
     </link>
