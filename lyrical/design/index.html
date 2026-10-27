@@ -82,6 +82,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/x500/configuration.html#payload">Payload</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/x500/visual_asset_commission.html">Visual asset commission</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/x500/visual_asset_commission.html#datums">Datums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/x500/visual_asset_commission.html#deviations-from-the-profile">Deviations from the profile</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/x500/index.html#the-default-vehicle">The default vehicle</a></li>
 </ul>
 </li>
@@ -213,19 +218,19 @@ composition). Extracting the machinery into a common package is planned.</p>
 </section>
 <section id="assets">
 <h2>Assets<a class="headerlink" href="#assets" title="Link to this heading"></a></h2>
-<p>The meshes are <strong>temporary placeholders</strong>, reused from PX4’s
-<a class="reference external" href="https://github.com/PX4/PX4-gazebo-models">PX4-gazebo-models</a> x500 model
-(BSD 3 Clause, <code class="docutils literal notranslate"><span class="pre">holybro_parts/models/LICENSE</span></code>). Two things to know about
-them:</p>
-<ul class="simple">
-<li><p>The frame is the NXP HoverGames body. It is geometrically close to the
-Holybro X500 V2 shell, but it is not the same shell.</p></li>
-<li><p>The motor bell is the HoverGames 5010.</p></li>
-</ul>
-<p>The inertias, rotor poses and motor constants are PX4’s matched, hover
-tuned set, so the vehicle flies correctly even though it does not look
-exactly right. Original Holybro art (glTF, PBR) will replace the
-placeholders part by part.</p>
+<p>Every visual is a glTF part (<code class="docutils literal notranslate"><span class="pre">.glb</span></code>) built to the
+<a class="reference external" href="https://github.com/HonuRobotics/gltf-robotics">Honu glTF Asset Profile</a>:
+one part per file, in glTF’s own axes, with its origin on a named datum and
+its PBR materials embedded. Every part is modeled by script from the kit’s
+dimensions.
+<code class="docutils literal notranslate"><span class="pre">holybro_parts/models/README.md</span></code> lists each part, its datum and its source.</p>
+<p>A glTF visual needs a fixed rotation onto the link’s axes, and the two
+consumers differ: RViz rolls glTF onto ROS axes as it loads, Gazebo does
+not. <code class="docutils literal notranslate"><span class="pre">part_visual</span></code> (in <code class="docutils literal notranslate"><span class="pre">parts.xacro</span></code>) writes the right rotation for each,
+and <code class="docutils literal notranslate"><span class="pre">x500_gazebo</span></code> expands its own copy of the URDF with <code class="docutils literal notranslate"><span class="pre">gltf_up:=z</span></code>.</p>
+<p>The slot positions are the kit’s measured ones. The inertias and motor
+constants are still PX4’s matched, hover tuned x500 set (BSD 3 Clause,
+<code class="docutils literal notranslate"><span class="pre">holybro_parts/models/LICENSE</span></code>).</p>
 </section>
 </section>
 
