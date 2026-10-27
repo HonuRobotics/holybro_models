@@ -19,11 +19,9 @@ repos:
       - id: check-xml
         types: [text]
         files: \.(xml|xacro|sdf)$|model\.config$
-        exclude: ^x500_description/meshes/
-      # Existing placeholder meshes reach 24 MB; tighten once the artist
-      # assets (with a size budget) replace them.
+      # The largest glTF part, the textured airframe, is about 7 MB.
       - id: check-added-large-files
-        args: [--maxkb=26000]
+        args: [--maxkb=10000]
 
   - repo: local
     hooks:

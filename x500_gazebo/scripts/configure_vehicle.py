@@ -114,7 +114,7 @@ def rviz_config(template, name):
 
 
 def configure(config, out_dir, name=None):
-    """Generate urdf, model.sdf, model.config, ros_gz_bridge.yaml and x500.rviz into out_dir."""
+    """Generate the urdfs, model.sdf, model.config, bridge config and x500.rviz into out_dir."""
     desc = pathlib.Path(get_package_share_directory('x500_description'))
     gz = pathlib.Path(get_package_share_directory('x500_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('x500_gazebo')) / 'lib' / 'x500_gazebo'
@@ -130,6 +130,11 @@ def configure(config, out_dir, name=None):
     urdf = out_dir / 'x500.urdf'
     urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}'],
                         'URDF generation'))
+    # Gazebo's copy: glTF visuals carry the whole rotation onto ROS axes,
+    # which RViz applies by itself on load (parts.xacro, part_visual).
+    gz_urdf = out_dir / 'x500_gz.urdf'
+    gz_urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}', 'gltf_up:=z'],
+                           'Gazebo URDF generation'))
     # robot_state_publisher parameter file, so the launch loads the URDF
     # without shelling out to read it (portable: no `cat`).
     (out_dir / 'robot_description.yaml').write_text(yaml.safe_dump(
@@ -137,7 +142,7 @@ def configure(config, out_dir, name=None):
             'robot_description': urdf.read_text()}}}))
     sdf = out_dir / 'model.sdf'
     sdf.write_text(run(['xacro', str(gz / 'model.sdf.xacro'),
-                        f'config_file:={config}', f'urdf_uri:=file://{urdf}'],
+                        f'config_file:={config}', f'urdf_uri:=file://{gz_urdf}'],
                        'model generation'))
     (out_dir / 'model.config').write_text(
         MODEL_CONFIG.format(name=instance_name(config_text)))
@@ -172,7 +177,7 @@ def main(argv=None):
     if args.cache:
         sys.stdout.write(str(out_dir))
     else:
-        print(f'wrote vehicle.yaml, x500.urdf, model.sdf, model.config, '
+        print(f'wrote vehicle.yaml, x500.urdf, x500_gz.urdf, model.sdf, model.config, '
               f'ros_gz_bridge.yaml, robot_description.yaml, x500.rviz to {out_dir}')
 
 

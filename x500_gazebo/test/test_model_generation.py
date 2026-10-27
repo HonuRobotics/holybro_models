@@ -151,7 +151,7 @@ def test_motors_follow_the_propeller_parts():
     assert numbers == {0, 1, 2}
     # A rotor occupant renamed away from its actuator number fails loudly.
     cfg = yaml.safe_dump(yaml.safe_load(default_config()) | {'parts': [
-        {'slot': 'rotor_0', 'type': 'prop_1345_ccw', 'name': 'front'}]},
+        {'slot': 'rotor_0', 'type': 'prop_1045_ccw', 'name': 'front'}]},
         sort_keys=False)
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
         f.write(cfg)
@@ -206,3 +206,29 @@ def test_installed_artifacts_match_shipped_config():
     assert {'rotor_0', 'rotor_1', 'rotor_2', 'rotor_3', 'battery', 'gps'} <= names
     links = {li.get('name') for li in installed_urdf.findall('link')}
     assert names <= links
+
+
+def _gltf_visual_rotations(urdf_path):
+    """Return the rpy of every visual whose mesh is a .glb, as float triples."""
+    root = ET.parse(urdf_path).getroot()
+    out = []
+    for visual in root.iter('visual'):
+        mesh = visual.find('geometry/mesh')
+        if mesh is not None and mesh.get('filename', '').endswith('.glb'):
+            out.append(tuple(float(v) for v in visual.find('origin').get('rpy').split()))
+    return out
+
+
+def test_gltf_visuals_are_rotated_for_each_consumer():
+    """Check Gazebo's URDF carries the whole glTF rotation and RViz's the yaw."""
+    # A delivered .glb is in glTF's axes. RViz rolls glTF +90 degrees about x
+    # as it loads, Gazebo applies nothing (Honu glTF Asset Profile, Axes), so
+    # the same part needs roll 1.5708 in the URDF Gazebo merges and roll 0 in
+    # the description RViz reads, with the same yaw in both.
+    ros = _gltf_visual_rotations(DESC_SHARE / 'urdf' / 'x500.urdf')
+    gz = _gltf_visual_rotations(GZ_SHARE / 'models' / 'x500' / 'x500.urdf')
+    assert ros and len(ros) == len(gz)
+    for (r_roll, r_pitch, r_yaw), (g_roll, g_pitch, g_yaw) in zip(ros, gz):
+        assert (r_roll, r_pitch) == (0.0, 0.0)
+        assert (g_roll, g_pitch) == (1.5708, 0.0)
+        assert r_yaw == g_yaw
