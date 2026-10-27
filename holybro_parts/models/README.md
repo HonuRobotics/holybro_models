@@ -40,8 +40,10 @@ profile.
 
 No glTF occlusion map is used: Ogre adds it as a light map (extra light), so
 occlusion is baked into the base color instead. Large base colors are JPEG, every
-data map PNG, nothing above 2048 px. All textures are generated; no third-party
-image assets are used.
+data map PNG. Textures are kept small so a vehicle stays light on GPU memory:
+baked maps are at most 512 px a side and normal maps 256 px, and printed labels
+hold at most 512 x 512 pixels of area, so a long thin print stays sharp. All
+textures are generated; no third-party image assets are used.
 
 The frame carries a representative avionics install of a typical X500 V2 build,
 modeled from published sizes and baked into its visual: flight controller, power

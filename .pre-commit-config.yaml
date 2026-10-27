@@ -19,9 +19,9 @@ repos:
       - id: check-xml
         types: [text]
         files: \.(xml|xacro|sdf)$|model\.config$
-      # The largest glTF part, the textured airframe, is about 16 MB.
+      # The largest glTF part, the textured airframe, is about 7 MB.
       - id: check-added-large-files
-        args: [--maxkb=20000]
+        args: [--maxkb=10000]
 
   - repo: local
     hooks:
